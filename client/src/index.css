@@ -1,0 +1,58 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+* {
+  -webkit-tap-highlight-color: transparent;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Inter', system-ui, sans-serif;
+  background-color: #F5F5F5;
+  color: #1A1A1A;
+  margin: 0;
+  padding: 0;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+#root {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+@layer utilities {
+  .pb-safe {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply bg-primary text-white font-semibold py-3 px-6 rounded-xl w-full transition-all duration-200 hover:bg-primary-dark active:scale-95;
+  }
+  .btn-dark {
+    @apply bg-admin-dark text-white font-semibold py-3 px-6 rounded-xl w-full transition-all duration-200 hover:bg-admin-mid active:scale-95;
+  }
+  .btn-outline {
+    @apply border-2 border-gray-300 text-gray-700 font-semibold py-3 px-6 rounded-xl w-full transition-all duration-200 hover:border-gray-400 active:scale-95;
+  }
+  .input-field {
+    @apply w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200 bg-white;
+  }
+  .card {
+    @apply bg-white rounded-2xl shadow-card p-4;
+  }
+  .status-badge {
+    @apply text-xs font-bold px-2.5 py-1 rounded-full uppercase tracking-wide;
+  }
+}
