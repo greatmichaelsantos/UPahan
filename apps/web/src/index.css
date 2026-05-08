@@ -1,0 +1,153 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --teal:         #2E7D72;
+  --teal-dark:    #1F5C56;
+  --teal-light:   #E8F5F3;
+  --gold:         #C9A84C;
+  --gold-light:   #FDF6E3;
+  --charcoal:     #4A4A4A;
+  --cream:        #FAF8F5;
+  --white:        #FFFFFF;
+  --gray-mid:     #888888;
+  --gray-light:   #F0EEEB;
+  --blue-accent:  #3A7BD5;
+  --red-alert:    #D64045;
+  --orange-mid:   #E07B39;
+}
+
+* {
+  -webkit-tap-highlight-color: transparent;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+  background-color: var(--cream);
+  color: var(--charcoal);
+  margin: 0;
+  padding: 0;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+#root {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.5; }
+}
+
+/* Focus ring for keyboard navigation */
+:focus-visible {
+  outline: 2px solid var(--teal);
+  outline-offset: 2px;
+}
+
+@layer utilities {
+  .pb-safe {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  .no-scrollbar::-webkit-scrollbar { display: none; }
+  .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+  .font-heading { font-family: 'Playfair Display', Georgia, serif; }
+}
+
+@layer components {
+  /* Buttons */
+  .btn-teal {
+    @apply bg-teal text-white font-semibold rounded-lg transition-all duration-150 disabled:opacity-60;
+    height: 52px;
+    width: 100%;
+    font-family: 'Inter', sans-serif;
+  }
+  .btn-teal:hover:not(:disabled) {
+    background-color: var(--teal-dark);
+    transform: scale(1.01);
+  }
+  .btn-teal:active:not(:disabled) { transform: scale(0.98); }
+
+  .btn-blue {
+    @apply text-white font-semibold rounded-lg transition-all duration-150 disabled:opacity-60;
+    background-color: var(--blue-accent);
+    height: 52px;
+    width: 100%;
+    font-family: 'Inter', sans-serif;
+  }
+  .btn-blue:hover:not(:disabled) {
+    background-color: #2f6abf;
+    transform: scale(1.01);
+  }
+
+  .btn-outline-teal {
+    @apply text-teal font-semibold rounded-lg transition-all duration-150;
+    border: 1.5px solid var(--teal);
+    background: transparent;
+    height: 52px;
+    width: 100%;
+    font-family: 'Inter', sans-serif;
+  }
+  .btn-outline-teal:hover {
+    background-color: var(--teal-light);
+    transform: scale(1.01);
+  }
+
+  .btn-gray {
+    @apply font-semibold rounded-lg transition-all duration-150;
+    background: #E0DDD8;
+    color: var(--charcoal);
+    height: 52px;
+    width: 100%;
+    font-family: 'Inter', sans-serif;
+  }
+
+  /* Legacy btn-primary now maps to teal */
+  .btn-primary { @apply btn-teal; }
+  .btn-dark     { @apply btn-teal; }
+  .btn-outline  { @apply btn-outline-teal; }
+
+  /* Input fields */
+  .input-field {
+    @apply w-full rounded-lg px-4 py-3 text-sm transition-all duration-150;
+    background: var(--gray-light);
+    border: 1.5px solid transparent;
+    height: 52px;
+    font-family: 'Inter', sans-serif;
+    color: var(--charcoal);
+  }
+  .input-field::placeholder { color: var(--gray-mid); }
+  .input-field:focus {
+    outline: none;
+    border-color: var(--teal);
+    background: var(--teal-light);
+  }
+
+  /* Cards */
+  .card {
+    @apply bg-white rounded-xl p-4;
+    box-shadow: 0 2px 12px rgba(46,125,114,0.08);
+  }
+  .card-hover:hover {
+    box-shadow: 0 4px 20px rgba(46,125,114,0.15);
+    transform: translateY(-2px);
+    transition: all 200ms ease;
+  }
+
+  /* Status badges */
+  .status-badge {
+    @apply text-[11px] font-semibold px-2.5 py-1 rounded-full uppercase;
+    letter-spacing: 0.04em;
+    font-family: 'Inter', sans-serif;
+    white-space: nowrap;
+  }
+}

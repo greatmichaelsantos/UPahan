@@ -1,0 +1,11 @@
+{
+  "name": "@upahan/shared",
+  "version": "1.0.0",
+  "description": "Shared utilities and constants for UPahan web and mobile apps",
+  "main": "index.js",
+  "exports": {
+    ".": "./index.js",
+    "./utils/format": "./utils/format.js",
+    "./utils/constants": "./utils/constants.js"
+  }
+}
