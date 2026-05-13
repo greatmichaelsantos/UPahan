@@ -31,7 +31,7 @@ export default {
       },
       fontFamily: {
         sans:  ['Inter', 'Segoe UI', 'system-ui', 'sans-serif'],
-        serif: ['"Playfair Display"', 'Georgia', 'serif'],
+        serif: ['Inter', 'system-ui', 'sans-serif'],
       },
       boxShadow: {
         card:       '0 2px 12px rgba(46,125,114,0.08)',

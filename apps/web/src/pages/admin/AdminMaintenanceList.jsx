@@ -49,7 +49,7 @@ export default function AdminMaintenanceList() {
   };
 
   return (
-    <AdminLayout>
+    <AdminLayout title="Fix Requests">
       <SectionHeader label="Maintenance" title="Fix Requests" />
 
       <div style={{ padding: 16, display: 'flex', flexDirection: 'column', gap: 14 }}>

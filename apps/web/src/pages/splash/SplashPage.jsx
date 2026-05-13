@@ -38,7 +38,7 @@ export default function SplashPage() {
 
         {/* Wordmark */}
         <h1 style={{
-          fontFamily: '"Playfair Display", Georgia, serif',
+          fontFamily: 'Inter',
           fontWeight: 700, fontSize: 42, color: 'white',
           letterSpacing: '0.04em', marginBottom: 12,
         }}>

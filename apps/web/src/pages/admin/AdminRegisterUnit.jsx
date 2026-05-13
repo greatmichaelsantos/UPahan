@@ -59,12 +59,12 @@ export default function AdminRegisterUnit() {
 
   if (success) {
     return (
-      <AdminLayout>
+      <AdminLayout title="Add New Unit">
         <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: 16 }}>
           <div style={{ width: 80, height: 80, borderRadius: '50%', background: '#E8F5F3', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <CheckCircle size={40} color="#2E7D72" />
           </div>
-          <h2 style={{ fontFamily: '"Playfair Display", Georgia, serif', fontWeight: 700, fontSize: 24, color: '#4A4A4A' }}>Unit Saved!</h2>
+          <h2 style={{ fontFamily: 'Inter', fontWeight: 700, fontSize: 24, color: '#4A4A4A' }}>Unit Saved!</h2>
           <p style={{ fontFamily: 'Inter', fontSize: 14, color: '#888888' }}>Redirecting to unit list...</p>
         </div>
       </AdminLayout>
@@ -76,7 +76,7 @@ export default function AdminRegisterUnit() {
   const onBlur  = (e) => { e.target.style.borderColor = 'transparent'; e.target.style.background = '#F0EEEB'; };
 
   return (
-    <AdminLayout>
+    <AdminLayout title="Add New Unit">
       <SectionHeader label="Inventory Intake" title="Register New Unit" onBack={() => navigate('/admin/units')} backLabel="Back to Units" />
 
       <form onSubmit={handleSubmit} style={{ padding: 16, display: 'flex', flexDirection: 'column', gap: 14 }}>

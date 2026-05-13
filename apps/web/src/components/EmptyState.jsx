@@ -13,7 +13,7 @@ export default function EmptyState({ icon: Icon, title, message, action }) {
         </div>
       )}
       <h3 style={{
-        fontFamily: '"Playfair Display", Georgia, serif',
+        fontFamily: 'Inter',
         fontWeight: 700, fontSize: 20, color: '#4A4A4A', margin: '0 0 8px',
       }}>
         {title}

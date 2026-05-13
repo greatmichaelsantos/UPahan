@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { CreditCard, FileText, Upload, ExternalLink } from 'lucide-react';
-import BottomNav from '../../components/BottomNav';
+import TenantLayout from '../../components/TenantLayout';
 import StatusBadge from '../../components/StatusBadge';
 import SubmitIdModal from '../../components/SubmitIdModal';
 import api from '../../utils/api';
@@ -31,17 +31,18 @@ export default function TenantDocuments() {
   const canSubmitId = !idDoc || idDoc.status === 'rejected';
 
   return (
-    <div style={{ minHeight: '100vh', background: '#FAF8F5', paddingBottom: 90 }}>
+    <TenantLayout title="Documents">
+    <div style={{ minHeight: '100vh', background: '#FAF8F5' }}>
 
-      {/* Header */}
-      <div style={{ background: 'white', padding: '16px 20px 14px', borderBottom: '1px solid #F0EEEB', boxShadow: '0 1px 8px rgba(46,125,114,0.05)' }}>
+      {/* Header — mobile only */}
+      <div className="md:hidden" style={{ background: 'white', padding: '16px 20px 14px', borderBottom: '1px solid #F0EEEB', boxShadow: '0 1px 8px rgba(46,125,114,0.05)' }}>
         <button
           onClick={() => navigate('/tenant')}
           style={{ fontFamily: 'Inter', fontWeight: 500, fontSize: 13, color: '#3A7BD5', background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6, marginBottom: 10 }}
         >
           ← Back
         </button>
-        <h1 style={{ fontFamily: '"Playfair Display", Georgia, serif', fontWeight: 700, fontSize: 26, color: '#4A4A4A' }}>
+        <h1 style={{ fontFamily: 'Inter', fontWeight: 700, fontSize: 26, color: '#4A4A4A' }}>
           My Documents
         </h1>
         <p style={{ fontFamily: 'Inter', fontSize: 13, color: '#888', marginTop: 4 }}>
@@ -92,8 +93,8 @@ export default function TenantDocuments() {
               )}
 
               {idDoc.status === 'verified' && (
-                <div style={{ background: '#E8F5F3', border: '1px solid #2E7D72', borderRadius: 10, padding: '10px 14px', marginBottom: 12 }}>
-                  <p style={{ fontFamily: 'Inter', fontSize: 13, color: '#2E7D72', fontWeight: 600 }}>
+                <div style={{ background: '#EBF4FF', border: '1px solid #4A90D9', borderRadius: 10, padding: '10px 14px', marginBottom: 12 }}>
+                  <p style={{ fontFamily: 'Inter', fontSize: 13, color: '#4A90D9', fontWeight: 600 }}>
                     ✓ Verified by landlord
                   </p>
                 </div>
@@ -149,8 +150,8 @@ export default function TenantDocuments() {
         {/* Lease Contract card */}
         <div className="card">
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14 }}>
-            <div style={{ width: 40, height: 40, borderRadius: 10, background: '#F0F9F7', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-              <FileText size={20} color="#2E7D72" />
+            <div style={{ width: 40, height: 40, borderRadius: 10, background: '#EBF4FF', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+              <FileText size={20} color="#4A90D9" />
             </div>
             <div style={{ flex: 1 }}>
               <p style={{ fontFamily: 'Inter', fontWeight: 700, fontSize: 15, color: '#4A4A4A' }}>Lease Contract</p>
@@ -191,8 +192,8 @@ export default function TenantDocuments() {
                 rel="noopener noreferrer"
                 style={{
                   display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
-                  width: '100%', padding: '12px', background: '#F0F9F7', color: '#2E7D72',
-                  border: '1.5px solid #2E7D72', borderRadius: 10, fontFamily: 'Inter',
+                  width: '100%', padding: '12px', background: '#EBF4FF', color: '#4A90D9',
+                  border: '1.5px solid #4A90D9', borderRadius: 10, fontFamily: 'Inter',
                   fontWeight: 700, fontSize: 14, textDecoration: 'none', boxSizing: 'border-box',
                 }}
               >
@@ -210,8 +211,6 @@ export default function TenantDocuments() {
 
       </div>
 
-      <BottomNav role="tenant" />
-
       {showIdModal && (
         <SubmitIdModal
           onClose={() => setShowIdModal(false)}
@@ -219,5 +218,6 @@ export default function TenantDocuments() {
         />
       )}
     </div>
+    </TenantLayout>
   );
 }

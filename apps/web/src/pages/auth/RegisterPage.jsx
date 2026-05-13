@@ -202,7 +202,7 @@ export default function RegisterPage() {
           </span>
         </div>
 
-        <h1 style={{ fontFamily: '"Playfair Display", Georgia, serif', fontWeight: 700, fontSize: 28, color: '#4A4A4A', textAlign: 'center', marginBottom: 6 }}>
+        <h1 style={{ fontFamily: 'Inter', fontWeight: 700, fontSize: 28, color: '#4A4A4A', textAlign: 'center', marginBottom: 6 }}>
           Create Account
         </h1>
         <p style={{ fontFamily: 'Inter', fontSize: 13, color: '#888888', textAlign: 'center', marginBottom: 24 }}>

@@ -54,9 +54,9 @@ export default function GuestUnits() {
           <svg width="20" height="20" viewBox="0 0 32 32" fill="none" aria-hidden="true">
             <path d="M16 3L3 14h3v14h8v-8h4v8h8V14h3L16 3z" fill="white" />
           </svg>
-          <span style={{ fontFamily: '"Playfair Display", Georgia, serif', fontWeight: 700, fontSize: 18, color: 'white' }}>UPAHAN</span>
+          <span style={{ fontFamily: 'Inter', fontWeight: 700, fontSize: 18, color: 'white' }}>UPAHAN</span>
         </div>
-        <h1 style={{ fontFamily: '"Playfair Display", Georgia, serif', fontWeight: 700, fontSize: 28, color: 'white', marginBottom: 4 }}>Available Units</h1>
+        <h1 style={{ fontFamily: 'Inter', fontWeight: 700, fontSize: 28, color: 'white', marginBottom: 4 }}>Available Units</h1>
         <p style={{ fontFamily: 'Inter', fontSize: 13, color: 'rgba(255,255,255,0.7)' }}>Zambales Properties for Rent</p>
       </div>
 
@@ -150,7 +150,7 @@ export default function GuestUnits() {
 
                   {/* Price overlay */}
                   <div style={{ position: 'absolute', bottom: 10, right: 10, background: 'rgba(255,255,255,0.92)', backdropFilter: 'blur(4px)', borderRadius: 8, padding: '6px 10px' }}>
-                    <span style={{ fontFamily: '"Playfair Display", Georgia, serif', fontWeight: 700, fontSize: 16, color: '#2E7D72' }}>
+                    <span style={{ fontFamily: 'Inter', fontWeight: 700, fontSize: 16, color: '#2E7D72' }}>
                       {formatPeso(unit.monthly_price)}
                     </span>
                     <span style={{ fontFamily: 'Inter', fontSize: 11, color: '#888888' }}>/mo</span>

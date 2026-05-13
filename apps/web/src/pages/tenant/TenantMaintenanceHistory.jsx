@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Plus, CheckCircle, Clock, Wrench } from 'lucide-react';
-import BottomNav from '../../components/BottomNav';
+import TenantLayout from '../../components/TenantLayout';
 import StatusBadge from '../../components/StatusBadge';
 import EmptyState from '../../components/EmptyState';
 import api from '../../utils/api';
@@ -28,10 +28,11 @@ export default function TenantMaintenanceHistory() {
   }, [location.key]);
 
   return (
-    <div style={{ minHeight: '100vh', background: '#FAF8F5', paddingBottom: 80 }}>
-      {/* Header */}
-      <div style={{ background: 'white', padding: '20px 20px 16px', borderBottom: '1px solid #F0EEEB' }}>
-        <h1 style={{ fontFamily: '"Playfair Display", Georgia, serif', fontWeight: 700, fontSize: 28, color: '#4A4A4A', marginBottom: 4 }}>
+    <TenantLayout title="Maintenance">
+    <div style={{ minHeight: '100vh', background: '#FAF8F5' }}>
+      {/* Header — mobile only */}
+      <div className="md:hidden" style={{ background: 'white', padding: '20px 20px 16px', borderBottom: '1px solid #F0EEEB' }}>
+        <h1 style={{ fontFamily: 'Inter', fontWeight: 700, fontSize: 28, color: '#4A4A4A', marginBottom: 4 }}>
           Maintenance
         </h1>
         <p style={{ fontFamily: 'Inter', fontSize: 13, color: '#888888' }}>Your maintenance request history</p>
@@ -79,11 +80,11 @@ export default function TenantMaintenanceHistory() {
                     {/* Status icon */}
                     <div style={{
                       width: 42, height: 42, borderRadius: 10, flexShrink: 0,
-                      background: isDone ? '#E8F5F3' : '#FEF3EC',
+                      background: isDone ? '#EBF4FF' : '#FEF3EC',
                       display: 'flex', alignItems: 'center', justifyContent: 'center',
                     }}>
                       {isDone
-                        ? <CheckCircle size={20} color="#2E7D72" aria-hidden="true" />
+                        ? <CheckCircle size={20} color="#4A90D9" aria-hidden="true" />
                         : <Clock size={20} color="#E07B39" aria-hidden="true" />
                       }
                     </div>
@@ -107,7 +108,7 @@ export default function TenantMaintenanceHistory() {
         )}
       </div>
 
-      <BottomNav role="tenant" />
     </div>
+    </TenantLayout>
   );
 }

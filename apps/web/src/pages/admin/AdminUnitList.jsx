@@ -42,7 +42,7 @@ export default function AdminUnitList() {
   const isVacant = (u) => u.vacancy_status === 'vacant';
 
   return (
-    <AdminLayout>
+    <AdminLayout title="Units">
       <SectionHeader label="Inventory" title="Unit List" />
 
       <div style={{ padding: '16px 16px 100px', display: 'flex', flexDirection: 'column', gap: 14 }}>

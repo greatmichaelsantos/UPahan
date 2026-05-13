@@ -87,7 +87,7 @@ export default function AdminPaymentRequests() {
   };
 
   return (
-    <AdminLayout>
+    <AdminLayout title="Payments">
       <SectionHeader label="Finance" title="Payment Requests" />
 
       <div style={{ padding: 16, display: 'flex', flexDirection: 'column', gap: 14 }}>
@@ -125,7 +125,7 @@ export default function AdminPaymentRequests() {
                     </div>
                   </div>
                   <div style={{ textAlign: 'right' }}>
-                    <p style={{ fontFamily: '"Playfair Display", Georgia, serif', fontWeight: 700, fontSize: 20, color: '#2E7D72' }}>
+                    <p style={{ fontFamily: 'Inter', fontWeight: 700, fontSize: 20, color: '#2E7D72' }}>
                       {formatPeso(d.amount)}
                     </p>
                     <p style={{ fontFamily: 'Inter', fontSize: 11, color: '#888888' }}>
@@ -217,7 +217,7 @@ export default function AdminPaymentRequests() {
       {/* Approve confirmation */}
       {approveTarget && (
         <Overlay>
-          <h3 style={{ fontFamily: '"Playfair Display", Georgia, serif', fontWeight: 700, fontSize: 20, color: '#4A4A4A', marginBottom: 8 }}>
+          <h3 style={{ fontFamily: 'Inter', fontWeight: 700, fontSize: 20, color: '#4A4A4A', marginBottom: 8 }}>
             Approve Payment?
           </h3>
           <p style={{ fontFamily: 'Inter', fontSize: 14, color: '#4A4A4A', lineHeight: 1.6, marginBottom: 20 }}>
@@ -252,7 +252,7 @@ export default function AdminPaymentRequests() {
       {/* Reject modal */}
       {rejectTarget && (
         <Overlay>
-          <h3 style={{ fontFamily: '"Playfair Display", Georgia, serif', fontWeight: 700, fontSize: 20, color: '#4A4A4A', marginBottom: 8 }}>
+          <h3 style={{ fontFamily: 'Inter', fontWeight: 700, fontSize: 20, color: '#4A4A4A', marginBottom: 8 }}>
             Reject Payment
           </h3>
           <p style={{ fontFamily: 'Inter', fontSize: 13, color: '#888888', marginBottom: 14 }}>

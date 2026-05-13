@@ -1,7 +1,9 @@
 {
   "permissions": {
     "allow": [
-      "Bash(dir C:\\\\Users\\\\Adrian\\\\OneDrive\\\\Desktop\\\\UPahan *)"
+      "Bash(dir C:\\\\Users\\\\Adrian\\\\OneDrive\\\\Desktop\\\\UPahan *)",
+      "mcp__memoryos__search_memory",
+      "mcp__memoryos__get_preferences"
     ]
   }
 }

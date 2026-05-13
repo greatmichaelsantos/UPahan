@@ -29,7 +29,7 @@ function timeAgo(dateStr) {
   return `${Math.floor(h / 24)}d ago`;
 }
 
-export default function NotificationBell() {
+export default function NotificationBell({ color = '#4A4A4A' }) {
   const navigate = useNavigate();
   const [open, setOpen]             = useState(false);
   const [notifications, setNotifications] = useState([]);
@@ -122,7 +122,7 @@ export default function NotificationBell() {
         }}
         aria-label="Notifications"
       >
-        <Bell size={22} color="#4A4A4A" />
+        <Bell size={22} color={color} />
         {unreadCount > 0 && (
           <span style={{
             position: 'absolute', top: 0, right: 0,

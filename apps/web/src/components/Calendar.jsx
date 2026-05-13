@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
-export default function Calendar() {
+export default function Calendar({ color = '#4A90D9', hoverBg = '#EBF4FF' }) {
   const today = new Date();
   const [current, setCurrent] = useState(new Date(today.getFullYear(), today.getMonth(), 1));
 
@@ -28,20 +28,24 @@ export default function Calendar() {
       <div className="flex items-center justify-between mb-3">
         <button
           onClick={prev}
-          className="flex items-center justify-center w-8 h-8 rounded-lg transition-colors hover:bg-teal-light"
+          className="flex items-center justify-center w-8 h-8 rounded-lg transition-colors"
+          onMouseOver={e => { e.currentTarget.style.background = hoverBg; }}
+          onMouseOut={e => { e.currentTarget.style.background = 'transparent'; }}
           aria-label="Previous month"
         >
-          <ChevronLeft size={16} style={{ color: '#2E7D72' }} />
+          <ChevronLeft size={16} style={{ color }} />
         </button>
-        <span style={{ fontFamily: '"Playfair Display", Georgia, serif', fontWeight: 700, fontSize: 15, color: '#4A4A4A' }}>
+        <span style={{ fontFamily: 'Inter', fontWeight: 700, fontSize: 15, color: '#4A4A4A' }}>
           {monthName}
         </span>
         <button
           onClick={next}
-          className="flex items-center justify-center w-8 h-8 rounded-lg transition-colors hover:bg-teal-light"
+          className="flex items-center justify-center w-8 h-8 rounded-lg transition-colors"
+          onMouseOver={e => { e.currentTarget.style.background = hoverBg; }}
+          onMouseOut={e => { e.currentTarget.style.background = 'transparent'; }}
           aria-label="Next month"
         >
-          <ChevronRight size={16} style={{ color: '#2E7D72' }} />
+          <ChevronRight size={16} style={{ color }} />
         </button>
       </div>
 
@@ -61,10 +65,10 @@ export default function Calendar() {
                 className="flex items-center justify-center w-7 h-7 rounded-full text-xs font-medium transition-colors cursor-default"
                 style={
                   isToday(d)
-                    ? { background: '#2E7D72', color: 'white', fontWeight: 700 }
+                    ? { background: color, color: 'white', fontWeight: 700 }
                     : { color: '#4A4A4A' }
                 }
-                onMouseOver={e => { if (!isToday(d)) e.currentTarget.style.background = '#E8F5F3'; }}
+                onMouseOver={e => { if (!isToday(d)) e.currentTarget.style.background = hoverBg; }}
                 onMouseOut={e => { if (!isToday(d)) e.currentTarget.style.background = 'transparent'; }}
               >
                 {d}

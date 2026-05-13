@@ -105,7 +105,7 @@ export default function AssignTenantModal({ unit, onClose, onSuccess }) {
             <p style={{ fontFamily: 'Inter', fontWeight: 700, fontSize: 11, color: '#C9A84C', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 4 }}>
               INVENTORY
             </p>
-            <h2 style={{ fontFamily: '"Playfair Display", Georgia, serif', fontWeight: 700, fontSize: 22, color: 'white' }}>
+            <h2 style={{ fontFamily: 'Inter', fontWeight: 700, fontSize: 22, color: 'white' }}>
               Assign Tenant
             </h2>
           </div>
@@ -123,7 +123,7 @@ export default function AssignTenantModal({ unit, onClose, onSuccess }) {
             </div>
             <div style={{ textAlign: 'right' }}>
               <p style={{ fontFamily: 'Inter', fontSize: 12, color: '#888888', marginBottom: 2 }}>Monthly Price</p>
-              <p style={{ fontFamily: '"Playfair Display", Georgia, serif', fontWeight: 700, fontSize: 16, color: '#2E7D72' }}>{formatPeso(unit?.monthly_price)}</p>
+              <p style={{ fontFamily: 'Inter', fontWeight: 700, fontSize: 16, color: '#2E7D72' }}>{formatPeso(unit?.monthly_price)}</p>
             </div>
           </div>
 
@@ -149,7 +149,7 @@ export default function AssignTenantModal({ unit, onClose, onSuccess }) {
               <div style={{ width: 60, height: 60, borderRadius: '50%', background: '#F0EEEB', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 12px' }}>
                 <Users size={28} color="#888888" />
               </div>
-              <p style={{ fontFamily: '"Playfair Display", Georgia, serif', fontWeight: 700, fontSize: 18, color: '#4A4A4A', marginBottom: 8 }}>
+              <p style={{ fontFamily: 'Inter', fontWeight: 700, fontSize: 18, color: '#4A4A4A', marginBottom: 8 }}>
                 No Tenant Accounts Found
               </p>
               <p style={{ fontFamily: 'Inter', fontSize: 13, color: '#888888', lineHeight: 1.5, maxWidth: 300, margin: '0 auto 20px' }}>

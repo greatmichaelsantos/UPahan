@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Camera, Lock, LogOut, ChevronRight, Eye, EyeOff, CreditCard, FileText, ExternalLink, X } from 'lucide-react';
-import BottomNav from '../../components/BottomNav';
+import TenantLayout from '../../components/TenantLayout';
 import StatusBadge from '../../components/StatusBadge';
 import SubmitIdModal from '../../components/SubmitIdModal';
 import { useAuth } from '../../context/AuthContext';
@@ -12,7 +12,7 @@ const BASE_URL = import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://lo
 
 const GOLD   = '#C9A84C';
 const BLUE   = '#3A7BD5';
-const TEAL   = '#2E7D72';
+const TEAL   = '#4A90D9';
 const RED    = '#D64045';
 const CREAM  = '#FAF8F5';
 
@@ -101,7 +101,7 @@ function ChangePasswordModal({ onClose }) {
     >
       <div className="w-full md:max-w-md" style={{ background: 'white', borderRadius: '20px 20px 0 0', padding: '24px 20px 36px' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
-          <h2 style={{ fontFamily: '"Playfair Display",Georgia,serif', fontWeight: 700, fontSize: 20, color: '#4A4A4A' }}>
+          <h2 style={{ fontFamily: 'Inter', fontWeight: 700, fontSize: 20, color: '#4A4A4A' }}>
             Change Password
           </h2>
           <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4, display: 'flex' }}>
@@ -110,7 +110,7 @@ function ChangePasswordModal({ onClose }) {
         </div>
 
         {success ? (
-          <div style={{ background: '#E8F5F3', border: '1px solid #2E7D72', borderRadius: 10, padding: '14px', textAlign: 'center' }}>
+          <div style={{ background: '#EBF4FF', border: '1px solid #4A90D9', borderRadius: 10, padding: '14px', textAlign: 'center' }}>
             <p style={{ fontFamily: 'Inter', fontWeight: 700, fontSize: 14, color: TEAL }}>Password changed successfully!</p>
           </div>
         ) : (
@@ -163,7 +163,7 @@ function LogoutModal({ onConfirm, onClose }) {
         <div style={{ width: 56, height: 56, borderRadius: '50%', background: '#FEF2F2', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
           <LogOut size={24} color={RED} />
         </div>
-        <h2 style={{ fontFamily: '"Playfair Display",Georgia,serif', fontWeight: 700, fontSize: 20, color: '#4A4A4A', marginBottom: 8 }}>
+        <h2 style={{ fontFamily: 'Inter', fontWeight: 700, fontSize: 20, color: '#4A4A4A', marginBottom: 8 }}>
           Log Out?
         </h2>
         <p style={{ fontFamily: 'Inter', fontSize: 14, color: '#888', marginBottom: 24, lineHeight: 1.5 }}>
@@ -306,273 +306,286 @@ export default function TenantProfile() {
 
   const initials = `${profile?.first_name?.[0] || ''}${profile?.last_name?.[0] || ''}`.toUpperCase() || 'T';
 
-  return (
-    <div style={{ minHeight: '100vh', background: CREAM, paddingBottom: 90 }}>
-
-      {/* Profile header */}
-      <div style={{ background: 'white', padding: '32px 20px 24px', borderBottom: '1px solid #F0EEEB', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-        {/* Avatar */}
-        <div style={{ position: 'relative', marginBottom: 14 }}>
-          <div style={{
-            width: 80, height: 80, borderRadius: '50%',
-            background: avatarSrc ? 'transparent' : BLUE,
-            border: '3px solid white',
-            boxShadow: '0 2px 12px rgba(58,123,213,0.25)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            overflow: 'hidden',
-          }}>
-            {avatarSrc ? (
-              <img src={avatarSrc} alt="Profile" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-            ) : (
-              <span style={{ fontFamily: 'Inter', fontWeight: 700, fontSize: 28, color: 'white' }}>{initials}</span>
-            )}
-            {avatarLoading && (
-              <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '50%' }}>
-                <div style={{ width: 20, height: 20, border: '2px solid white', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 0.7s linear infinite' }} />
-              </div>
-            )}
-          </div>
-          {/* Camera button */}
-          <button
-            onClick={() => fileInputRef.current?.click()}
-            style={{
-              position: 'absolute', bottom: 0, right: 0,
-              width: 26, height: 26, borderRadius: '50%',
-              background: BLUE, border: '2px solid white',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              cursor: 'pointer', boxShadow: '0 1px 4px rgba(0,0,0,0.2)',
-            }}
-            aria-label="Change profile photo"
-          >
-            <Camera size={12} color="white" />
-          </button>
-          <input ref={fileInputRef} type="file" accept="image/jpeg,image/png" onChange={handleAvatarChange} style={{ display: 'none' }} />
+  /* ── Shared avatar block (reused in both mobile header and desktop left col) ── */
+  const renderAvatar = () => (
+    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+      <div style={{ position: 'relative', marginBottom: 14 }}>
+        <div style={{
+          width: 80, height: 80, borderRadius: '50%',
+          background: avatarSrc ? 'transparent' : BLUE,
+          border: '3px solid white',
+          boxShadow: '0 2px 12px rgba(58,123,213,0.25)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          overflow: 'hidden',
+        }}>
+          {avatarSrc ? (
+            <img src={avatarSrc} alt="Profile" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+          ) : (
+            <span style={{ fontFamily: 'Inter', fontWeight: 700, fontSize: 28, color: 'white' }}>{initials}</span>
+          )}
+          {avatarLoading && (
+            <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '50%' }}>
+              <div style={{ width: 20, height: 20, border: '2px solid white', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 0.7s linear infinite' }} />
+            </div>
+          )}
         </div>
+        <button
+          onClick={() => fileInputRef.current?.click()}
+          style={{
+            position: 'absolute', bottom: 0, right: 0,
+            width: 26, height: 26, borderRadius: '50%',
+            background: BLUE, border: '2px solid white',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            cursor: 'pointer', boxShadow: '0 1px 4px rgba(0,0,0,0.2)',
+          }}
+          aria-label="Change profile photo"
+        >
+          <Camera size={12} color="white" />
+        </button>
+        <input ref={fileInputRef} type="file" accept="image/jpeg,image/png" onChange={handleAvatarChange} style={{ display: 'none' }} />
+      </div>
+      <p style={{ fontFamily: 'Inter', fontWeight: 700, fontSize: 20, color: '#4A4A4A', marginBottom: 4, textAlign: 'center' }}>
+        {profile ? `${profile.first_name} ${profile.last_name}` : '—'}
+      </p>
+      <p style={{ fontFamily: 'Inter', fontSize: 13, color: '#888888', textAlign: 'center' }}>
+        {profile?.email || user?.email}
+      </p>
+    </div>
+  );
 
-        <p style={{ fontFamily: '"Playfair Display",Georgia,serif', fontWeight: 700, fontSize: 20, color: '#4A4A4A', marginBottom: 4 }}>
-          {profile ? `${profile.first_name} ${profile.last_name}` : '—'}
-        </p>
-        <p style={{ fontFamily: 'Inter', fontSize: 13, color: '#888888' }}>
-          {profile?.email || user?.email}
-        </p>
+  return (
+    <TenantLayout title="Profile">
+    <div style={{ minHeight: '100vh', background: CREAM }}>
+
+      {/* Profile header — mobile only */}
+      <div className="md:hidden" style={{ background: 'white', padding: '32px 20px 24px', borderBottom: '1px solid #F0EEEB' }}>
+        {renderAvatar()}
       </div>
 
-      <div style={{ padding: '20px 16px', display: 'flex', flexDirection: 'column', gap: 20 }}>
+      <div className="p-4 md:p-6">
+        <div className="flex flex-col gap-4 md:grid md:gap-6 md:items-start" style={{ gridTemplateColumns: '1fr 380px' }}>
 
-        {/* ── Personal Information ─────────────────────────────── */}
-        <div>
-          <p style={sectionLabel}>Personal Information</p>
-          <div style={cardStyle}>
-            {/* First Name */}
-            <div style={{ marginBottom: 14 }}>
-              <label style={{ fontFamily: 'Inter', fontSize: 12, fontWeight: 600, color: '#555', display: 'block', marginBottom: 6 }}>First Name</label>
-              <input
-                value={form.first_name}
-                onChange={handleFieldChange('first_name')}
-                style={inputStyle}
-                onFocus={e => e.target.style.borderColor = BLUE}
-                onBlur={e => e.target.style.borderColor = '#E5E0D8'}
-              />
-            </div>
-            {/* Last Name */}
-            <div style={{ marginBottom: 14 }}>
-              <label style={{ fontFamily: 'Inter', fontSize: 12, fontWeight: 600, color: '#555', display: 'block', marginBottom: 6 }}>Last Name</label>
-              <input
-                value={form.last_name}
-                onChange={handleFieldChange('last_name')}
-                style={inputStyle}
-                onFocus={e => e.target.style.borderColor = BLUE}
-                onBlur={e => e.target.style.borderColor = '#E5E0D8'}
-              />
-            </div>
-            {/* Phone */}
-            <div style={{ marginBottom: 14 }}>
-              <label style={{ fontFamily: 'Inter', fontSize: 12, fontWeight: 600, color: '#555', display: 'block', marginBottom: 6 }}>Phone Number</label>
-              <input
-                type="tel"
-                value={form.phone_number}
-                onChange={handlePhoneChange}
-                maxLength={11}
-                placeholder="09XXXXXXXXX"
-                style={{ ...inputStyle, borderColor: phoneError ? RED : '#E5E0D8' }}
-                onFocus={e => e.target.style.borderColor = phoneError ? RED : BLUE}
-                onBlur={e => e.target.style.borderColor = phoneError ? RED : '#E5E0D8'}
-              />
-              {phoneError && <p style={{ fontFamily: 'Inter', fontSize: 12, color: RED, marginTop: 4 }}>{phoneError}</p>}
-            </div>
-            {/* Email (read-only) */}
-            <div style={{ marginBottom: 16 }}>
-              <label style={{ fontFamily: 'Inter', fontSize: 12, fontWeight: 600, color: '#555', display: 'block', marginBottom: 6 }}>
-                Email Address
-                <span style={{ marginLeft: 6, color: '#AAA', fontWeight: 400, display: 'inline-flex', alignItems: 'center', gap: 3 }}>
-                  <Lock size={10} /> locked
-                </span>
-              </label>
-              <input
-                value={profile?.email || user?.email || ''}
-                readOnly
-                style={{ ...inputStyle, background: '#F5F5F5', color: '#888', cursor: 'not-allowed', borderColor: '#EBEBEB' }}
-              />
+          {/* ── LEFT column ─── */}
+          <div className="flex flex-col gap-4">
+
+            {/* Desktop avatar card */}
+            <div className="hidden md:block" style={{ ...cardStyle, textAlign: 'center', padding: '28px 20px' }}>
+              {renderAvatar()}
             </div>
 
-            {saveError && (
-              <div style={{ background: '#FEF2F2', borderRadius: 8, padding: '10px 14px', marginBottom: 12 }}>
-                <p style={{ fontFamily: 'Inter', fontSize: 13, color: RED }}>{saveError}</p>
-              </div>
-            )}
-            {saveSuccess && (
-              <div style={{ background: '#E8F5F3', borderRadius: 8, padding: '10px 14px', marginBottom: 12 }}>
-                <p style={{ fontFamily: 'Inter', fontSize: 13, color: TEAL, fontWeight: 600 }}>{saveSuccess}</p>
-              </div>
-            )}
-
-            {isDirty && (
-              <button
-                onClick={handleSave}
-                disabled={saveLoading}
-                style={{ width: '100%', padding: '13px', background: saveLoading ? '#9BB8E8' : BLUE, color: 'white', border: 'none', borderRadius: 10, fontFamily: 'Inter', fontWeight: 700, fontSize: 14, cursor: saveLoading ? 'not-allowed' : 'pointer' }}
-              >
-                {saveLoading ? 'Saving...' : 'SAVE CHANGES'}
-              </button>
-            )}
-          </div>
-        </div>
-
-        {/* ── Documents ───────────────────────────────────────── */}
-        <div>
-          <p style={sectionLabel}>My Documents</p>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-
-            {/* Valid ID */}
-            <div style={cardStyle}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: idDoc ? 12 : 0 }}>
-                <div style={{ width: 40, height: 40, borderRadius: 10, background: '#EEF4FF', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                  <CreditCard size={20} color={BLUE} />
+            {/* Personal Information */}
+            <div>
+              <p style={sectionLabel}>Personal Information</p>
+              <div style={cardStyle}>
+                <div style={{ marginBottom: 14 }}>
+                  <label style={{ fontFamily: 'Inter', fontSize: 12, fontWeight: 600, color: '#555', display: 'block', marginBottom: 6 }}>First Name</label>
+                  <input
+                    value={form.first_name}
+                    onChange={handleFieldChange('first_name')}
+                    style={inputStyle}
+                    onFocus={e => e.target.style.borderColor = BLUE}
+                    onBlur={e => e.target.style.borderColor = '#E5E0D8'}
+                  />
                 </div>
-                <div style={{ flex: 1 }}>
-                  <p style={{ fontFamily: 'Inter', fontWeight: 700, fontSize: 15, color: '#4A4A4A' }}>Valid ID</p>
-                  {idDoc ? (
-                    <p style={{ fontFamily: 'Inter', fontSize: 11, marginTop: 2, fontWeight: 600,
-                      color: idDoc.status === 'verified' ? TEAL : idDoc.status === 'rejected' ? RED : '#E07B39'
-                    }}>
-                      {idDoc.status === 'verified' ? '✓ Verified'
-                        : idDoc.status === 'rejected' ? '✗ Rejected'
-                        : '● Under Review'}
-                    </p>
-                  ) : (
-                    <p style={{ fontFamily: 'Inter', fontSize: 11, color: '#AAAAAA', marginTop: 2 }}>Not submitted</p>
-                  )}
+                <div style={{ marginBottom: 14 }}>
+                  <label style={{ fontFamily: 'Inter', fontSize: 12, fontWeight: 600, color: '#555', display: 'block', marginBottom: 6 }}>Last Name</label>
+                  <input
+                    value={form.last_name}
+                    onChange={handleFieldChange('last_name')}
+                    style={inputStyle}
+                    onFocus={e => e.target.style.borderColor = BLUE}
+                    onBlur={e => e.target.style.borderColor = '#E5E0D8'}
+                  />
                 </div>
-                {idDoc && <StatusBadge status={idDoc.status === 'under_review' ? 'under_review' : idDoc.status} />}
-              </div>
+                <div style={{ marginBottom: 14 }}>
+                  <label style={{ fontFamily: 'Inter', fontSize: 12, fontWeight: 600, color: '#555', display: 'block', marginBottom: 6 }}>Phone Number</label>
+                  <input
+                    type="tel"
+                    value={form.phone_number}
+                    onChange={handlePhoneChange}
+                    maxLength={11}
+                    placeholder="09XXXXXXXXX"
+                    style={{ ...inputStyle, borderColor: phoneError ? RED : '#E5E0D8' }}
+                    onFocus={e => e.target.style.borderColor = phoneError ? RED : BLUE}
+                    onBlur={e => e.target.style.borderColor = phoneError ? RED : '#E5E0D8'}
+                  />
+                  {phoneError && <p style={{ fontFamily: 'Inter', fontSize: 12, color: RED, marginTop: 4 }}>{phoneError}</p>}
+                </div>
+                <div style={{ marginBottom: 16 }}>
+                  <label style={{ fontFamily: 'Inter', fontSize: 12, fontWeight: 600, color: '#555', display: 'block', marginBottom: 6 }}>
+                    Email Address
+                    <span style={{ marginLeft: 6, color: '#AAA', fontWeight: 400, display: 'inline-flex', alignItems: 'center', gap: 3 }}>
+                      <Lock size={10} /> locked
+                    </span>
+                  </label>
+                  <input
+                    value={profile?.email || user?.email || ''}
+                    readOnly
+                    style={{ ...inputStyle, background: '#F5F5F5', color: '#888', cursor: 'not-allowed', borderColor: '#EBEBEB' }}
+                  />
+                </div>
 
-              {idDoc?.status === 'rejected' && idDoc?.rejection_reason && (
-                <p style={{ fontFamily: 'Inter', fontSize: 12, color: RED, fontStyle: 'italic', marginBottom: 10 }}>
-                  Reason: {idDoc.rejection_reason}
-                </p>
-              )}
+                {saveError && (
+                  <div style={{ background: '#FEF2F2', borderRadius: 8, padding: '10px 14px', marginBottom: 12 }}>
+                    <p style={{ fontFamily: 'Inter', fontSize: 13, color: RED }}>{saveError}</p>
+                  </div>
+                )}
+                {saveSuccess && (
+                  <div style={{ background: '#EBF4FF', borderRadius: 8, padding: '10px 14px', marginBottom: 12 }}>
+                    <p style={{ fontFamily: 'Inter', fontSize: 13, color: TEAL, fontWeight: 600 }}>{saveSuccess}</p>
+                  </div>
+                )}
 
-              <div style={{ display: 'flex', gap: 8 }}>
-                {canSubmitId && (
+                {isDirty && (
                   <button
-                    onClick={() => setShowIdModal(true)}
-                    style={{ flex: 1, padding: '10px', background: 'transparent', color: TEAL, border: `1.5px solid ${TEAL}`, borderRadius: 10, fontFamily: 'Inter', fontWeight: 700, fontSize: 13, cursor: 'pointer' }}
+                    onClick={handleSave}
+                    disabled={saveLoading}
+                    style={{ width: '100%', padding: '13px', background: saveLoading ? '#9BB8E8' : BLUE, color: 'white', border: 'none', borderRadius: 10, fontFamily: 'Inter', fontWeight: 700, fontSize: 14, cursor: saveLoading ? 'not-allowed' : 'pointer' }}
                   >
-                    {idDoc?.status === 'rejected' ? 'Resubmit ID' : 'Submit ID'}
+                    {saveLoading ? 'Saving...' : 'SAVE CHANGES'}
                   </button>
                 )}
-                {idDoc && (idDoc.status === 'under_review' || idDoc.status === 'verified') && idDoc.front_image && (
-                  <a
-                    href={`${BASE_URL}/uploads/documents/${idDoc.front_image}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    style={{ flex: 1, padding: '10px', background: '#F0F9F7', color: TEAL, border: `1.5px solid ${TEAL}`, borderRadius: 10, fontFamily: 'Inter', fontWeight: 700, fontSize: 13, textDecoration: 'none', textAlign: 'center', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}
-                  >
-                    <ExternalLink size={13} /> View ID
-                  </a>
-                )}
               </div>
             </div>
+          </div>
 
-            {/* Lease Contract */}
-            <div style={cardStyle}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: contract ? 12 : 0 }}>
-                <div style={{ width: 40, height: 40, borderRadius: 10, background: '#F0F9F7', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                  <FileText size={20} color={TEAL} />
-                </div>
-                <div style={{ flex: 1 }}>
-                  <p style={{ fontFamily: 'Inter', fontWeight: 700, fontSize: 15, color: '#4A4A4A' }}>Lease Contract</p>
-                  <p style={{ fontFamily: 'Inter', fontSize: 11, marginTop: 2, fontWeight: 600, color: contract ? TEAL : '#AAAAAA' }}>
-                    {contract ? '✓ Available' : 'Not yet uploaded by landlord'}
-                  </p>
-                </div>
-                {contract && <StatusBadge status="verified" />}
-              </div>
+          {/* ── RIGHT column ── */}
+          <div className="flex flex-col gap-4">
 
-              {contract && (
-                <>
-                  {(contract.contract_start_date || contract.contract_end_date) && (
-                    <p style={{ fontFamily: 'Inter', fontSize: 12, color: '#888', marginBottom: 10 }}>
-                      {contract.contract_start_date ? formatDate(contract.contract_start_date, 'medium') : '—'}
-                      {' – '}
-                      {contract.contract_end_date ? formatDate(contract.contract_end_date, 'medium') : 'Ongoing'}
+            {/* Documents */}
+            <div>
+              <p style={sectionLabel}>My Documents</p>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+
+                {/* Valid ID */}
+                <div style={cardStyle}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: idDoc ? 12 : 0 }}>
+                    <div style={{ width: 40, height: 40, borderRadius: 10, background: '#EEF4FF', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                      <CreditCard size={20} color={BLUE} />
+                    </div>
+                    <div style={{ flex: 1 }}>
+                      <p style={{ fontFamily: 'Inter', fontWeight: 700, fontSize: 15, color: '#4A4A4A' }}>Valid ID</p>
+                      {idDoc ? (
+                        <p style={{ fontFamily: 'Inter', fontSize: 11, marginTop: 2, fontWeight: 600,
+                          color: idDoc.status === 'verified' ? TEAL : idDoc.status === 'rejected' ? RED : '#E07B39'
+                        }}>
+                          {idDoc.status === 'verified' ? '✓ Verified'
+                            : idDoc.status === 'rejected' ? '✗ Rejected'
+                            : '● Under Review'}
+                        </p>
+                      ) : (
+                        <p style={{ fontFamily: 'Inter', fontSize: 11, color: '#AAAAAA', marginTop: 2 }}>Not submitted</p>
+                      )}
+                    </div>
+                    {idDoc && <StatusBadge status={idDoc.status === 'under_review' ? 'under_review' : idDoc.status} />}
+                  </div>
+
+                  {idDoc?.status === 'rejected' && idDoc?.rejection_reason && (
+                    <p style={{ fontFamily: 'Inter', fontSize: 12, color: RED, fontStyle: 'italic', marginBottom: 10 }}>
+                      Reason: {idDoc.rejection_reason}
                     </p>
                   )}
-                  <a
-                    href={`${BASE_URL}/uploads/documents/${contract.contract_file}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, width: '100%', padding: '10px', background: '#F0F9F7', color: TEAL, border: `1.5px solid ${TEAL}`, borderRadius: 10, fontFamily: 'Inter', fontWeight: 700, fontSize: 13, textDecoration: 'none', boxSizing: 'border-box' }}
-                  >
-                    <ExternalLink size={13} /> View / Download Contract
-                  </a>
-                </>
-              )}
+
+                  <div style={{ display: 'flex', gap: 8 }}>
+                    {canSubmitId && (
+                      <button
+                        onClick={() => setShowIdModal(true)}
+                        style={{ flex: 1, padding: '10px', background: 'transparent', color: TEAL, border: `1.5px solid ${TEAL}`, borderRadius: 10, fontFamily: 'Inter', fontWeight: 700, fontSize: 13, cursor: 'pointer' }}
+                      >
+                        {idDoc?.status === 'rejected' ? 'Resubmit ID' : 'Submit ID'}
+                      </button>
+                    )}
+                    {idDoc && (idDoc.status === 'under_review' || idDoc.status === 'verified') && idDoc.front_image && (
+                      <a
+                        href={`${BASE_URL}/uploads/documents/${idDoc.front_image}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        style={{ flex: 1, padding: '10px', background: '#F0F9F7', color: TEAL, border: `1.5px solid ${TEAL}`, borderRadius: 10, fontFamily: 'Inter', fontWeight: 700, fontSize: 13, textDecoration: 'none', textAlign: 'center', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}
+                      >
+                        <ExternalLink size={13} /> View ID
+                      </a>
+                    )}
+                  </div>
+                </div>
+
+                {/* Lease Contract */}
+                <div style={cardStyle}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: contract ? 12 : 0 }}>
+                    <div style={{ width: 40, height: 40, borderRadius: 10, background: '#F0F9F7', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                      <FileText size={20} color={TEAL} />
+                    </div>
+                    <div style={{ flex: 1 }}>
+                      <p style={{ fontFamily: 'Inter', fontWeight: 700, fontSize: 15, color: '#4A4A4A' }}>Lease Contract</p>
+                      <p style={{ fontFamily: 'Inter', fontSize: 11, marginTop: 2, fontWeight: 600, color: contract ? TEAL : '#AAAAAA' }}>
+                        {contract ? '✓ Available' : 'Not yet uploaded by landlord'}
+                      </p>
+                    </div>
+                    {contract && <StatusBadge status="verified" />}
+                  </div>
+
+                  {contract && (
+                    <>
+                      {(contract.contract_start_date || contract.contract_end_date) && (
+                        <p style={{ fontFamily: 'Inter', fontSize: 12, color: '#888', marginBottom: 10 }}>
+                          {contract.contract_start_date ? formatDate(contract.contract_start_date, 'medium') : '—'}
+                          {' – '}
+                          {contract.contract_end_date ? formatDate(contract.contract_end_date, 'medium') : 'Ongoing'}
+                        </p>
+                      )}
+                      <a
+                        href={`${BASE_URL}/uploads/documents/${contract.contract_file}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, width: '100%', padding: '10px', background: '#F0F9F7', color: TEAL, border: `1.5px solid ${TEAL}`, borderRadius: 10, fontFamily: 'Inter', fontWeight: 700, fontSize: 13, textDecoration: 'none', boxSizing: 'border-box' }}
+                      >
+                        <ExternalLink size={13} /> View / Download Contract
+                      </a>
+                    </>
+                  )}
+                </div>
+              </div>
             </div>
+
+            {/* Account */}
+            <div>
+              <p style={sectionLabel}>Account</p>
+              <div style={cardStyle}>
+                <button
+                  onClick={() => setShowPwModal(true)}
+                  style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 0', background: 'none', border: 'none', cursor: 'pointer', borderBottom: '1px solid #F0EEEB' }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                    <div style={{ width: 36, height: 36, borderRadius: 8, background: '#EEF4FF', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <Lock size={16} color={BLUE} />
+                    </div>
+                    <span style={{ fontFamily: 'Inter', fontWeight: 600, fontSize: 14, color: '#4A4A4A' }}>Change Password</span>
+                  </div>
+                  <ChevronRight size={18} color="#BBBBBB" />
+                </button>
+
+                <button
+                  onClick={() => setShowLogoutModal(true)}
+                  style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 0', background: 'none', border: 'none', cursor: 'pointer', marginTop: 2 }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                    <div style={{ width: 36, height: 36, borderRadius: 8, background: '#FEF2F2', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <LogOut size={16} color={RED} />
+                    </div>
+                    <span style={{ fontFamily: 'Inter', fontWeight: 600, fontSize: 14, color: RED }}>Log Out</span>
+                  </div>
+                  <ChevronRight size={18} color="#BBBBBB" />
+                </button>
+              </div>
+            </div>
+
           </div>
         </div>
-
-        {/* ── Account ─────────────────────────────────────────── */}
-        <div>
-          <p style={sectionLabel}>Account</p>
-          <div style={cardStyle}>
-            {/* Change Password */}
-            <button
-              onClick={() => setShowPwModal(true)}
-              style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 0', background: 'none', border: 'none', cursor: 'pointer', borderBottom: '1px solid #F0EEEB' }}
-            >
-              <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                <div style={{ width: 36, height: 36, borderRadius: 8, background: '#EEF4FF', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <Lock size={16} color={BLUE} />
-                </div>
-                <span style={{ fontFamily: 'Inter', fontWeight: 600, fontSize: 14, color: '#4A4A4A' }}>Change Password</span>
-              </div>
-              <ChevronRight size={18} color="#BBBBBB" />
-            </button>
-
-            {/* Log Out */}
-            <button
-              onClick={() => setShowLogoutModal(true)}
-              style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 0', background: 'none', border: 'none', cursor: 'pointer', marginTop: 2 }}
-            >
-              <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                <div style={{ width: 36, height: 36, borderRadius: 8, background: '#FEF2F2', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <LogOut size={16} color={RED} />
-                </div>
-                <span style={{ fontFamily: 'Inter', fontWeight: 600, fontSize: 14, color: RED }}>Log Out</span>
-              </div>
-              <ChevronRight size={18} color="#BBBBBB" />
-            </button>
-          </div>
-        </div>
-
       </div>
-
-      <BottomNav role="tenant" />
 
       {showPwModal    && <ChangePasswordModal onClose={() => setShowPwModal(false)} />}
       {showLogoutModal && <LogoutModal onConfirm={logout} onClose={() => setShowLogoutModal(false)} />}
       {showIdModal    && <SubmitIdModal onClose={() => setShowIdModal(false)} onSuccess={() => { setShowIdModal(false); fetchDocuments(); }} />}
     </div>
+    </TenantLayout>
   );
 }

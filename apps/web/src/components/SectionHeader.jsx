@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 
 export default function SectionHeader({ label, title, onBack, backLabel = 'Back', children }) {
   return (
-    <div style={{ background: '#2E7D72', padding: '24px 20px 28px' }}>
+    <div className="md:hidden" style={{ background: '#2E7D72', padding: '24px 20px 28px' }}>
       {onBack && (
         <button
           onClick={onBack}
@@ -35,7 +35,7 @@ export default function SectionHeader({ label, title, onBack, backLabel = 'Back'
 
       <h1 style={{
         color: 'white',
-        fontFamily: '"Playfair Display", Georgia, serif',
+        fontFamily: 'Inter',
         fontWeight: 700,
         fontSize: 28,
         lineHeight: 1.2,

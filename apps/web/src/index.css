@@ -60,7 +60,6 @@ body {
   }
   .no-scrollbar::-webkit-scrollbar { display: none; }
   .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-  .font-heading { font-family: 'Playfair Display', Georgia, serif; }
 }
 
 @layer components {
@@ -150,4 +149,33 @@ body {
     font-family: 'Inter', sans-serif;
     white-space: nowrap;
   }
+}
+
+/* Active nav item — must be relative + overflow visible for curves */
+.nav-active-item,
+.nav-active-admin,
+.nav-active-tenant {
+  position: relative;
+  overflow: visible !important;
+}
+
+/* Concave curve divs rendered inside the active nav button */
+.nav-curve-top,
+.nav-curve-bottom {
+  position: absolute;
+  right: 1px;
+  width: 12px;
+  height: 12px;
+  pointer-events: none;
+  z-index: 10;
+}
+
+.nav-curve-top {
+  top: -12px;
+  border-bottom-right-radius: 12px;
+}
+
+.nav-curve-bottom {
+  bottom: -12px;
+  border-top-right-radius: 12px;
 }

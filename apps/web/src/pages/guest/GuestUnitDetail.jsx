@@ -77,7 +77,7 @@ export default function GuestUnitDetail() {
           borderRadius: 999, padding: '6px 12px',
           display: 'flex', alignItems: 'baseline', gap: 2,
         }}>
-          <span style={{ fontFamily: '"Playfair Display", Georgia, serif', fontWeight: 700, fontSize: 18, color: '#2E7D72' }}>
+          <span style={{ fontFamily: 'Inter', fontWeight: 700, fontSize: 18, color: '#2E7D72' }}>
             {formatPeso(unit.monthly_price)}
           </span>
           <span style={{ fontFamily: 'Inter', fontSize: 12, color: '#888888' }}>/month</span>
@@ -88,7 +88,7 @@ export default function GuestUnitDetail() {
 
         {/* Title + address */}
         <div>
-          <h1 style={{ fontFamily: '"Playfair Display", Georgia, serif', fontWeight: 700, fontSize: 28, color: '#4A4A4A', marginBottom: 8 }}>
+          <h1 style={{ fontFamily: 'Inter', fontWeight: 700, fontSize: 28, color: '#4A4A4A', marginBottom: 8 }}>
             Unit {unit.unit_code} Details
           </h1>
           {unit.location && (
@@ -128,7 +128,7 @@ export default function GuestUnitDetail() {
 
         {/* Contact owner */}
         <div className="card">
-          <p style={{ fontFamily: '"Playfair Display", Georgia, serif', fontWeight: 600, fontSize: 20, color: '#4A4A4A', marginBottom: 16 }}>Contact Owner</p>
+          <p style={{ fontFamily: 'Inter', fontWeight: 600, fontSize: 20, color: '#4A4A4A', marginBottom: 16 }}>Contact Owner</p>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
             <div style={{ width: 48, height: 48, borderRadius: '50%', background: '#E8F5F3', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
               <span style={{ fontFamily: 'Inter', fontWeight: 700, fontSize: 20, color: '#2E7D72' }}>R</span>

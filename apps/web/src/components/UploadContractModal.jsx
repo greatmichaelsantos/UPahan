@@ -73,7 +73,7 @@ export default function UploadContractModal({ unit, tenant, onClose, onSuccess }
         <div style={{ background: TEAL, borderRadius: '20px 20px 0 0', padding: '18px 20px 14px' }}>
           <div className="flex items-center justify-between">
             <div>
-              <h2 style={{ color: 'white', fontFamily: '"Playfair Display",Georgia,serif', fontWeight: 700, fontSize: 18, margin: 0 }}>
+              <h2 style={{ color: 'white', fontFamily: 'Inter', fontWeight: 700, fontSize: 18, margin: 0 }}>
                 Upload Contract
               </h2>
               <p style={{ color: 'rgba(255,255,255,0.75)', fontFamily: 'Inter', fontSize: 12, marginTop: 2 }}>

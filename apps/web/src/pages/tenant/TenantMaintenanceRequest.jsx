@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Camera, Plus, CheckCircle, ChevronDown, AlertCircle } from 'lucide-react';
-import BottomNav from '../../components/BottomNav';
+import TenantLayout from '../../components/TenantLayout';
 import api from '../../utils/api';
 
 const CATEGORIES = [
@@ -61,10 +61,10 @@ export default function TenantMaintenanceRequest() {
   if (success) {
     return (
       <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: '#FAF8F5', gap: 16 }}>
-        <div style={{ width: 80, height: 80, borderRadius: '50%', background: '#E8F5F3', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <CheckCircle size={40} color="#2E7D72" />
+        <div style={{ width: 80, height: 80, borderRadius: '50%', background: '#EBF4FF', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <CheckCircle size={40} color="#4A90D9" />
         </div>
-        <h2 style={{ fontFamily: '"Playfair Display", Georgia, serif', fontWeight: 700, fontSize: 24, color: '#4A4A4A' }}>Request Submitted!</h2>
+        <h2 style={{ fontFamily: 'Inter', fontWeight: 700, fontSize: 24, color: '#4A4A4A' }}>Request Submitted!</h2>
         <p style={{ fontFamily: 'Inter', fontSize: 14, color: '#888888' }}>We'll notify you when it's addressed.</p>
       </div>
     );
@@ -79,16 +79,17 @@ export default function TenantMaintenanceRequest() {
   const onBlur  = (e) => { e.target.style.borderColor = 'transparent'; e.target.style.background = '#F0EEEB'; };
 
   return (
-    <div style={{ minHeight: '100vh', background: '#FAF8F5', paddingBottom: 80 }}>
-      {/* Header */}
-      <div style={{ background: 'white', padding: '16px 20px 16px', borderBottom: '1px solid #F0EEEB' }}>
+    <TenantLayout title="New Request">
+    <div style={{ minHeight: '100vh', background: '#FAF8F5' }}>
+      {/* Header — mobile only */}
+      <div className="md:hidden" style={{ background: 'white', padding: '16px 20px 16px', borderBottom: '1px solid #F0EEEB' }}>
         <button
           onClick={() => navigate('/tenant/maintenance')}
           style={{ fontFamily: 'Inter', fontWeight: 500, fontSize: 13, color: '#3A7BD5', background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6, marginBottom: 10 }}
         >
           ← Back
         </button>
-        <h1 style={{ fontFamily: '"Playfair Display", Georgia, serif', fontWeight: 700, fontSize: 26, color: '#4A4A4A' }}>New Request</h1>
+        <h1 style={{ fontFamily: 'Inter', fontWeight: 700, fontSize: 26, color: '#4A4A4A' }}>New Request</h1>
         <p style={{ fontFamily: 'Inter', fontSize: 13, color: '#888888', marginTop: 4 }}>Report a maintenance issue in your unit</p>
       </div>
 
@@ -220,7 +221,7 @@ export default function TenantMaintenanceRequest() {
         </button>
       </form>
 
-      <BottomNav role="tenant" />
     </div>
+    </TenantLayout>
   );
 }

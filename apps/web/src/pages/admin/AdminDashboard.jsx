@@ -1,17 +1,15 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Plus, Wrench, TrendingUp, CreditCard } from 'lucide-react';
-import { useAuth } from '../../context/AuthContext';
 import AdminLayout from '../../components/AdminLayout';
 import Calendar from '../../components/Calendar';
-import SectionHeader from '../../components/SectionHeader';
-import NotificationBell from '../../components/NotificationBell';
 import api from '../../utils/api';
+import { useAuth } from '../../context/AuthContext';
 
 export default function AdminDashboard() {
   const navigate  = useNavigate();
   const location  = useLocation();
-  const { user } = useAuth();
+  const { user }  = useAuth();
   const [summary, setSummary]                 = useState({ percentage: 0, paid: 0, occupied: 0 });
   const [pendingCount, setPendingCount]       = useState(0);
   const [paymentPending, setPaymentPending]   = useState(0);
@@ -30,119 +28,132 @@ export default function AdminDashboard() {
   const monthName = new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
 
   const onTrack = summary.percentage >= 80 ? 'ON TRACK' : summary.percentage >= 50 ? 'IN PROGRESS' : 'NEEDS ATTENTION';
-  const onTrackColor = summary.percentage >= 80 ? '#2E7D72' : summary.percentage >= 50 ? '#E07B39' : '#D64045';
 
   return (
-    <AdminLayout>
-      <SectionHeader label="Landlord" title="Property Overview">
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 6 }}>
-          <p style={{ color: 'rgba(255,255,255,0.75)', fontFamily: 'Inter', fontSize: 13 }}>
-            Welcome back, {user?.first_name}
-          </p>
-          <div style={{ background: 'rgba(255,255,255,0.15)', borderRadius: 8, padding: 4 }}>
-            <NotificationBell />
-          </div>
-        </div>
-      </SectionHeader>
+    <AdminLayout title="Dashboard">
 
-      <div style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: 16 }}>
+      {/* ── Page content — mobile: single col, desktop: 2-col grid ── */}
+      <div className="p-4 md:p-6">
+        <div className="flex flex-col gap-4 md:grid md:gap-6 md:items-start" style={{ gridTemplateColumns: '1fr 380px' }}>
 
-        {/* Rent Collection Card */}
-        <div className="card" style={{ padding: 20 }}>
-          <div className="flex items-center justify-between mb-3">
+          {/* ── LEFT COLUMN: collection, actions, payments ── */}
+          <div className="flex flex-col gap-4">
+
+            {/* Greeting */}
             <div>
-              <p style={{ fontFamily: 'Inter', fontWeight: 600, fontSize: 11, color: '#888888', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 4 }}>
-                RENT COLLECTION
+              <h2 style={{ fontFamily: 'Inter', fontWeight: 700, fontSize: 28, color: '#4A4A4A', lineHeight: 1.2 }}>
+                Welcome back, {user?.first_name || ''}
+              </h2>
+            </div>
+
+            {/* Rent Collection Card */}
+            <div style={{ background: '#277571', borderRadius: 16, padding: 24 }}>
+              <div className="flex items-center justify-between" style={{ marginBottom: 8 }}>
+                <div>
+                  <p style={{ fontFamily: 'Inter', fontWeight: 600, fontSize: 11, color: 'rgba(255,255,255,0.75)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 6 }}>
+                    RENT COLLECTION
+                  </p>
+                  <span style={{ display: 'inline-block', background: 'rgba(255,255,255,0.2)', color: 'white', borderRadius: 999, padding: '3px 10px', fontFamily: 'Inter', fontWeight: 600, fontSize: 11, letterSpacing: '0.04em' }}>
+                    {onTrack}
+                  </span>
+                </div>
+                <div style={{ width: 40, height: 40, borderRadius: 10, background: 'rgba(255,255,255,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <TrendingUp size={20} color="white" aria-hidden="true" />
+                </div>
+              </div>
+              <p style={{ fontFamily: 'Inter', fontWeight: 700, fontSize: 48, color: 'white', lineHeight: 1, margin: '8px 0 4px' }}>
+                {summary.percentage}%
               </p>
-              <span style={{ display: 'inline-block', background: '#E8F5F3', color: onTrackColor, borderRadius: 999, padding: '3px 10px', fontFamily: 'Inter', fontWeight: 600, fontSize: 11, letterSpacing: '0.04em' }}>
-                {onTrack}
-              </span>
+              <p style={{ fontFamily: 'Inter', fontSize: 12, color: 'rgba(255,255,255,0.75)', marginBottom: 12 }}>
+                COLLECTED THIS MONTH — {monthName}
+              </p>
+              <p style={{ fontFamily: 'Inter', fontSize: 12, color: 'rgba(255,255,255,0.7)', marginBottom: 10 }}>
+                {summary.paid}/{summary.occupied} units paid
+              </p>
+              <div style={{ background: 'rgba(255,255,255,0.2)', borderRadius: 999, height: 8, overflow: 'hidden' }}>
+                <div style={{ width: `${summary.percentage}%`, background: 'white', height: '100%', borderRadius: 999, transition: 'width 700ms ease' }} />
+              </div>
             </div>
-            <div style={{ width: 40, height: 40, borderRadius: 10, background: '#E8F5F3', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <TrendingUp size={20} color="#2E7D72" aria-hidden="true" />
+
+            {/* Quick actions */}
+            <div className="grid grid-cols-2 gap-3">
+              <button
+                onClick={() => navigate('/admin/units/new')}
+                className="card"
+                style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 12, padding: 20, minHeight: 130, cursor: 'pointer', border: 'none', transition: 'all 200ms ease' }}
+                onMouseOver={e => { e.currentTarget.style.background = '#E8F5F3'; e.currentTarget.style.transform = 'translateY(-2px)'; }}
+                onMouseOut={e => { e.currentTarget.style.background = 'white'; e.currentTarget.style.transform = 'translateY(0)'; }}
+                aria-label="Add new unit"
+              >
+                <div style={{ width: 48, height: 48, borderRadius: 12, background: '#E8F5F3', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <Plus size={24} color="#2E7D72" aria-hidden="true" />
+                </div>
+                <span style={{ fontFamily: 'Inter', fontWeight: 600, fontSize: 13, color: '#4A4A4A', textAlign: 'center' }}>ADD NEW UNIT</span>
+              </button>
+
+              <button
+                onClick={() => navigate('/admin/maintenance')}
+                className="card"
+                style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 12, padding: 20, minHeight: 130, cursor: 'pointer', border: 'none', transition: 'all 200ms ease', position: 'relative' }}
+                onMouseOver={e => { e.currentTarget.style.background = '#FDF6E3'; e.currentTarget.style.transform = 'translateY(-2px)'; }}
+                onMouseOut={e => { e.currentTarget.style.background = 'white'; e.currentTarget.style.transform = 'translateY(0)'; }}
+                aria-label="Fix requests"
+              >
+                <div style={{ position: 'relative' }}>
+                  <div style={{ width: 48, height: 48, borderRadius: 12, background: '#FDF6E3', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <Wrench size={24} color="#C9A84C" aria-hidden="true" />
+                  </div>
+                  {pendingCount > 0 && (
+                    <span style={{
+                      position: 'absolute', top: -6, right: -6,
+                      background: '#C9A84C', color: 'white',
+                      fontSize: 10, fontWeight: 700, fontFamily: 'Inter',
+                      width: 18, height: 18, borderRadius: '50%',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    }}>
+                      {pendingCount > 9 ? '9+' : pendingCount}
+                    </span>
+                  )}
+                </div>
+                <span style={{ fontFamily: 'Inter', fontWeight: 600, fontSize: 13, color: '#4A4A4A', textAlign: 'center' }}>FIX REQUESTS</span>
+              </button>
             </div>
-          </div>
 
-          <p style={{ fontFamily: '"Playfair Display", Georgia, serif', fontWeight: 700, fontSize: 48, color: '#4A4A4A', lineHeight: 1, margin: '8px 0 4px' }}>
-            {summary.percentage}%
-          </p>
-          <p style={{ fontFamily: 'Inter', fontSize: 12, color: '#888888', marginBottom: 12 }}>
-            COLLECTED THIS MONTH — {monthName}
-          </p>
-          <p style={{ fontFamily: 'Inter', fontSize: 12, color: '#888888', marginBottom: 10 }}>
-            {summary.paid}/{summary.occupied} units paid
-          </p>
+            {/* Payment requests */}
+            <button
+              onClick={() => navigate('/admin/payments')}
+              className="card"
+              style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '16px 20px', cursor: 'pointer', border: 'none', transition: 'all 200ms ease', width: '100%', textAlign: 'left' }}
+              onMouseOver={e => { e.currentTarget.style.background = '#E8F5F3'; e.currentTarget.style.transform = 'translateY(-2px)'; }}
+              onMouseOut={e => { e.currentTarget.style.background = 'white'; e.currentTarget.style.transform = 'translateY(0)'; }}
+              aria-label="Payment requests"
+            >
+              <div style={{ width: 48, height: 48, borderRadius: 12, background: '#E8F5F3', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                <CreditCard size={24} color="#2E7D72" aria-hidden="true" />
+              </div>
+              <div>
+                <p style={{ fontFamily: 'Inter', fontWeight: 700, fontSize: 14, color: '#4A4A4A', marginBottom: 2 }}>PAYMENT REQUESTS</p>
+                <p style={{ fontFamily: 'Inter', fontSize: 12, color: paymentPending > 0 ? '#C9A84C' : '#888888', fontWeight: paymentPending > 0 ? 600 : 400 }}>
+                  {paymentPending > 0 ? `${paymentPending} pending review` : 'No pending declarations'}
+                </p>
+              </div>
+            </button>
 
-          {/* Progress bar */}
-          <div style={{ background: '#F0EEEB', borderRadius: 999, height: 8, overflow: 'hidden' }}>
-            <div style={{ width: `${summary.percentage}%`, background: '#2E7D72', height: '100%', borderRadius: 999, transition: 'width 700ms ease' }} />
-          </div>
+          </div>{/* end left column */}
+
+          {/* ── RIGHT COLUMN: calendar ── */}
+          <div className="flex flex-col gap-4">
+
+            <div className="card" style={{ padding: 16 }}>
+              <p style={{ fontFamily: 'Inter', fontWeight: 700, fontSize: 11, color: '#C9A84C', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 12 }}>
+                CALENDAR
+              </p>
+              <Calendar color="#277571" hoverBg="#E8F5F3" />
+            </div>
+
+          </div>{/* end right column */}
+
         </div>
-
-        {/* Quick actions */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-          <button
-            onClick={() => navigate('/admin/units/new')}
-            className="card"
-            style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12, padding: 20, cursor: 'pointer', border: 'none', transition: 'all 200ms ease' }}
-            onMouseOver={e => { e.currentTarget.style.background = '#E8F5F3'; e.currentTarget.style.transform = 'translateY(-2px)'; }}
-            onMouseOut={e => { e.currentTarget.style.background = 'white'; e.currentTarget.style.transform = 'translateY(0)'; }}
-            aria-label="Add new unit"
-          >
-            <div style={{ width: 48, height: 48, borderRadius: 12, background: '#E8F5F3', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <Plus size={24} color="#2E7D72" aria-hidden="true" />
-            </div>
-            <span style={{ fontFamily: 'Inter', fontWeight: 600, fontSize: 13, color: '#4A4A4A', textAlign: 'center' }}>ADD NEW UNIT</span>
-          </button>
-
-          <button
-            onClick={() => navigate('/admin/maintenance')}
-            className="card"
-            style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8, padding: 20, cursor: 'pointer', border: 'none', transition: 'all 200ms ease' }}
-            onMouseOver={e => { e.currentTarget.style.background = '#FDF6E3'; e.currentTarget.style.transform = 'translateY(-2px)'; }}
-            onMouseOut={e => { e.currentTarget.style.background = 'white'; e.currentTarget.style.transform = 'translateY(0)'; }}
-            aria-label="Fix requests"
-          >
-            <div style={{ width: 48, height: 48, borderRadius: 12, background: '#FDF6E3', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <Wrench size={24} color="#C9A84C" aria-hidden="true" />
-            </div>
-            <span style={{ fontFamily: 'Inter', fontWeight: 600, fontSize: 13, color: '#4A4A4A', textAlign: 'center' }}>FIX REQUESTS</span>
-            {pendingCount > 0 && (
-              <span style={{ fontFamily: 'Inter', fontSize: 11, fontWeight: 600, color: '#C9A84C' }}>
-                {pendingCount} pending request{pendingCount !== 1 ? 's' : ''}
-              </span>
-            )}
-          </button>
-        </div>
-
-        {/* Payment requests quick action */}
-        <button
-          onClick={() => navigate('/admin/payments')}
-          className="card"
-          style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '16px 20px', cursor: 'pointer', border: 'none', transition: 'all 200ms ease', width: '100%', textAlign: 'left' }}
-          onMouseOver={e => { e.currentTarget.style.background = '#E8F5F3'; e.currentTarget.style.transform = 'translateY(-2px)'; }}
-          onMouseOut={e => { e.currentTarget.style.background = 'white'; e.currentTarget.style.transform = 'translateY(0)'; }}
-          aria-label="Payment requests"
-        >
-          <div style={{ width: 48, height: 48, borderRadius: 12, background: '#E8F5F3', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-            <CreditCard size={24} color="#2E7D72" aria-hidden="true" />
-          </div>
-          <div>
-            <p style={{ fontFamily: 'Inter', fontWeight: 700, fontSize: 14, color: '#4A4A4A', marginBottom: 2 }}>PAYMENT REQUESTS</p>
-            <p style={{ fontFamily: 'Inter', fontSize: 12, color: paymentPending > 0 ? '#C9A84C' : '#888888', fontWeight: paymentPending > 0 ? 600 : 400 }}>
-              {paymentPending > 0 ? `${paymentPending} pending review` : 'No pending declarations'}
-            </p>
-          </div>
-        </button>
-
-        {/* Calendar */}
-        <div className="card" style={{ padding: 16 }}>
-          <p style={{ fontFamily: 'Inter', fontWeight: 700, fontSize: 11, color: '#C9A84C', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 12 }}>
-            CALENDAR
-          </p>
-          <Calendar />
-        </div>
-
       </div>
     </AdminLayout>
   );

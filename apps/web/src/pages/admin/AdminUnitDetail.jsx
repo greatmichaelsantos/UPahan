@@ -24,6 +24,7 @@ export default function AdminUnitDetail() {
   const [toast, setToast] = useState('');
   const [removing, setRemoving]       = useState(false);
   const [removeError, setRemoveError] = useState('');
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   const showToast = (msg) => { setToast(msg); setTimeout(() => setToast(''), 3000); };
 
@@ -40,10 +41,20 @@ export default function AdminUnitDetail() {
     api.get(`/documents/unit/${id}`).then(r => setDocuments(r.data.data || [])).catch(() => {});
   }, [id]);
 
+  const handleDeleteUnit = async () => {
+    try {
+      await api.delete(`/units/${id}`);
+      setShowDeleteModal(false);
+      navigate('/admin/units');
+    } catch (err) {
+      alert('Failed to delete unit.');
+    }
+  };
+
   useEffect(() => { load(); loadDocuments(); }, [id, location.key]);
 
   if (loading) return (
-    <AdminLayout>
+    <AdminLayout title="Unit Detail">
       <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         <div style={{ width: 32, height: 32, border: '4px solid #E8F5F3', borderTopColor: '#2E7D72', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
       </div>
@@ -52,7 +63,7 @@ export default function AdminUnitDetail() {
   if (!unit) return null;
 
   return (
-    <AdminLayout>
+    <AdminLayout title="Unit Detail">
       {/* Back */}
       <div style={{ padding: '16px 20px 0' }}>
         <button
@@ -74,7 +85,7 @@ export default function AdminUnitDetail() {
           </div>
           <p style={{ fontFamily: 'Inter', fontSize: 13, color: '#888888' }}>{unit.floor_plan || 'Unit Details'}</p>
         </div>
-        <p style={{ fontFamily: '"Playfair Display", Georgia, serif', fontWeight: 700, fontSize: 22, color: '#4A4A4A' }}>
+        <p style={{ fontFamily: 'Inter', fontWeight: 700, fontSize: 22, color: '#4A4A4A' }}>
           {formatPeso(unit.monthly_price)}
         </p>
       </div>
@@ -333,6 +344,21 @@ export default function AdminUnitDetail() {
           >
             <Edit2 size={15} aria-hidden="true" /> EDIT UNIT
           </button>
+
+          <button
+            onClick={() => setShowDeleteModal(true)}
+            style={{
+              width: '100%', height: 48, borderRadius: 8, background: 'transparent',
+              border: '1.5px solid #D64045', color: '#D64045',
+              fontFamily: 'Inter', fontWeight: 600, fontSize: 13,
+              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
+              cursor: 'pointer', transition: 'all 150ms ease', marginTop: 12,
+            }}
+            onMouseOver={e => { e.currentTarget.style.background = '#FEF2F2'; }}
+            onMouseOut={e => { e.currentTarget.style.background = 'transparent'; }}
+          >
+            🗑 Delete Unit
+          </button>
         </div>
       </div>
 
@@ -349,7 +375,6 @@ export default function AdminUnitDetail() {
           unit={unit}
           onClose={() => setModal(null)}
           onSuccess={() => { setModal(null); load(); }}
-          onDeleted={() => navigate('/admin/units')}
         />
       )}
       {modal === 'contract' && (
@@ -376,7 +401,7 @@ export default function AdminUnitDetail() {
             {/* Modal header */}
             <div style={{ background: '#D64045', padding: '18px 20px 16px', display: 'flex', alignItems: 'center', gap: 10 }}>
               <UserMinus size={20} color="white" aria-hidden="true" />
-              <h2 style={{ fontFamily: '"Playfair Display", Georgia, serif', fontWeight: 700, fontSize: 20, color: 'white', margin: 0 }}>Remove Tenant</h2>
+              <h2 style={{ fontFamily: 'Inter', fontWeight: 700, fontSize: 20, color: 'white', margin: 0 }}>Remove Tenant</h2>
             </div>
 
             <div style={{ padding: 20, display: 'flex', flexDirection: 'column', gap: 14 }}>
@@ -436,6 +461,39 @@ export default function AdminUnitDetail() {
                 CANCEL
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Unit modal */}
+      {showDeleteModal && (
+        <div
+          style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.45)', zIndex: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}
+          onClick={() => setShowDeleteModal(false)}
+        >
+          <div
+            style={{ background: 'white', borderRadius: 16, width: '100%', maxWidth: 384, boxShadow: '0 8px 40px rgba(0,0,0,0.18)', padding: 32, display: 'flex', flexDirection: 'column', alignItems: 'center' }}
+            onClick={e => e.stopPropagation()}
+          >
+            <div style={{ width: 56, height: 56, borderRadius: '50%', background: '#FEF2F2', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 16, fontSize: 24 }}>
+              🗑
+            </div>
+            <h3 style={{ fontFamily: 'Inter', fontWeight: 700, fontSize: 20, color: '#1A1A1A', marginBottom: 8 }}>Delete Unit?</h3>
+            <p style={{ fontFamily: 'Inter', fontSize: 13, color: '#888888', textAlign: 'center', marginBottom: 24, lineHeight: 1.5 }}>
+              This will permanently delete this unit and cannot be undone.
+            </p>
+            <button
+              onClick={handleDeleteUnit}
+              style={{ width: '100%', height: 48, borderRadius: 10, background: '#D64045', color: 'white', border: 'none', fontFamily: 'Inter', fontWeight: 700, fontSize: 14, cursor: 'pointer', marginBottom: 12 }}
+            >
+              DELETE UNIT
+            </button>
+            <button
+              onClick={() => setShowDeleteModal(false)}
+              style={{ width: '100%', height: 48, borderRadius: 10, background: '#F0EEEB', color: '#4A4A4A', border: 'none', fontFamily: 'Inter', fontWeight: 700, fontSize: 14, cursor: 'pointer' }}
+            >
+              CANCEL
+            </button>
           </div>
         </div>
       )}

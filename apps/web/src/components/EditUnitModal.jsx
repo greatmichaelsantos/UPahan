@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { X, Camera, Trash2, AlertTriangle, BedDouble, UserMinus } from 'lucide-react';
+import { X, Camera, AlertTriangle, BedDouble, UserMinus } from 'lucide-react';
 import api from '../utils/api';
 
 const OVERLAY = {
@@ -33,7 +33,7 @@ function friendlyEditError(msg) {
   return 'Something went wrong. Please try again.';
 }
 
-export default function EditUnitModal({ unit, onClose, onSuccess, onDeleted }) {
+export default function EditUnitModal({ unit, onClose, onSuccess }) {
   const [form, setForm] = useState({
     unitCode:      unit?.unit_code      || '',
     monthlyPrice:  unit?.monthly_price  || '',
@@ -46,8 +46,6 @@ export default function EditUnitModal({ unit, onClose, onSuccess, onDeleted }) {
   const [newPhotos, setNewPhotos]     = useState([]);
   const [previews, setPreviews]       = useState([]);
   const [submitting, setSubmitting]   = useState(false);
-  const [deleting, setDeleting]       = useState(false);
-  const [confirmDelete, setConfirmDelete] = useState(false);
   const [confirmRemove, setConfirmRemove] = useState(false);
   const [removing, setRemoving]       = useState(false);
   const [error, setError]             = useState('');
@@ -102,24 +100,6 @@ export default function EditUnitModal({ unit, onClose, onSuccess, onDeleted }) {
     }
   };
 
-  const handleDelete = async () => {
-    if (unit?.vacancy_status === 'occupied') {
-      setError('Cannot delete an occupied unit. Please unassign the tenant first.');
-      setConfirmDelete(false);
-      return;
-    }
-    setDeleting(true);
-    setError('');
-    try {
-      await api.delete(`/units/${unit.unit_id}`);
-      onDeleted(unit.unit_code);
-    } catch (err) {
-      setError(err.response?.data?.message || 'Something went wrong. Please try again.');
-      setDeleting(false);
-      setConfirmDelete(false);
-    }
-  };
-
   return (
     <div style={OVERLAY} onClick={onClose} role="dialog" aria-modal="true" aria-label="Edit Unit">
       <div style={MODAL} onClick={e => e.stopPropagation()}>
@@ -130,7 +110,7 @@ export default function EditUnitModal({ unit, onClose, onSuccess, onDeleted }) {
             <p style={{ fontFamily: 'Inter', fontWeight: 700, fontSize: 11, color: '#C9A84C', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 4 }}>
               INVENTORY
             </p>
-            <h2 style={{ fontFamily: '"Playfair Display", Georgia, serif', fontWeight: 700, fontSize: 22, color: 'white' }}>
+            <h2 style={{ fontFamily: 'Inter', fontWeight: 700, fontSize: 22, color: 'white' }}>
               Edit Unit {unit?.unit_code}
             </h2>
           </div>
@@ -332,34 +312,6 @@ export default function EditUnitModal({ unit, onClose, onSuccess, onDeleted }) {
             </div>
           )}
 
-          {/* Delete section */}
-          <div style={{ borderTop: '1px solid #F0EEEB', paddingTop: 14, marginTop: 4 }}>
-            {!confirmDelete ? (
-              <button type="button" onClick={() => { setError(''); setConfirmDelete(true); }}
-                style={{ fontFamily: 'Inter', fontWeight: 600, fontSize: 13, color: '#D64045', background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6, width: '100%', justifyContent: 'center' }}>
-                <Trash2 size={14} /> Delete Unit
-              </button>
-            ) : (
-              <div style={{ background: '#FDEEEE', borderRadius: 10, padding: '14px', display: 'flex', flexDirection: 'column', gap: 10 }}>
-                <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10 }}>
-                  <AlertTriangle size={18} color="#D64045" style={{ flexShrink: 0, marginTop: 1 }} />
-                  <p style={{ fontFamily: 'Inter', fontSize: 13, color: '#4A4A4A', lineHeight: 1.5 }}>
-                    Are you sure you want to delete Unit <strong>{unit?.unit_code}</strong>? This action cannot be undone.
-                  </p>
-                </div>
-                <div style={{ display: 'flex', gap: 8 }}>
-                  <button type="button" onClick={handleDelete} disabled={deleting}
-                    style={{ flex: 1, height: 40, borderRadius: 8, background: '#D64045', color: 'white', border: 'none', fontFamily: 'Inter', fontWeight: 700, fontSize: 13, cursor: deleting ? 'not-allowed' : 'pointer', opacity: deleting ? 0.6 : 1 }}>
-                    {deleting ? 'Deleting...' : 'CONFIRM DELETE'}
-                  </button>
-                  <button type="button" onClick={() => setConfirmDelete(false)} disabled={deleting}
-                    style={{ flex: 1, height: 40, borderRadius: 8, background: '#E0DDD8', color: '#4A4A4A', border: 'none', fontFamily: 'Inter', fontWeight: 700, fontSize: 13, cursor: 'pointer' }}>
-                    GO BACK
-                  </button>
-                </div>
-              </div>
-            )}
-          </div>
         </form>
       </div>
     </div>

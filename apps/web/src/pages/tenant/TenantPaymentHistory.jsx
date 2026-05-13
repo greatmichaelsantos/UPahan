@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Download, Info, Receipt, AlertCircle } from 'lucide-react';
-import BottomNav from '../../components/BottomNav';
+import TenantLayout from '../../components/TenantLayout';
 import StatusBadge from '../../components/StatusBadge';
 import EmptyState from '../../components/EmptyState';
 import api from '../../utils/api';
@@ -78,14 +78,6 @@ export default function TenantPaymentHistory() {
     return Object.entries(groups).sort((a, b) => b[0].localeCompare(a[0]));
   };
 
-  const getMonthStatus = (entries) => {
-    const statuses = entries.map(e => e.payment_status);
-    if (statuses.every(s => s === 'paid')) return 'paid';
-    if (statuses.some(s => s === 'late')) return 'late';
-    if (statuses.some(s => s === 'partial')) return 'partial';
-    return entries[0]?.payment_status || 'unpaid';
-  };
-
   const grouped = groupByMonth(payments);
   const pendingCount = declarations.filter(d => d.payment_status === 'pending_approval').length;
 
@@ -98,10 +90,11 @@ export default function TenantPaymentHistory() {
   });
 
   return (
-    <div style={{ minHeight: '100vh', background: '#FAF8F5', paddingBottom: 80 }}>
+    <TenantLayout title="Payments">
+    <div style={{ minHeight: '100vh', background: '#FAF8F5' }}>
 
-      {/* Header */}
-      <div style={{ background: 'white', padding: '16px 20px', borderBottom: '1px solid #F0EEEB' }}>
+      {/* Header — mobile only */}
+      <div className="md:hidden" style={{ background: 'white', padding: '16px 20px', borderBottom: '1px solid #F0EEEB' }}>
         <button
           onClick={() => navigate('/tenant')}
           style={{ fontFamily: 'Inter', fontWeight: 500, fontSize: 13, color: '#3A7BD5', background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6, marginBottom: 10 }}
@@ -109,7 +102,7 @@ export default function TenantPaymentHistory() {
           ← Back
         </button>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <h1 style={{ fontFamily: '"Playfair Display", Georgia, serif', fontWeight: 700, fontSize: 26, color: '#4A4A4A' }}>Payments</h1>
+          <h1 style={{ fontFamily: 'Inter', fontWeight: 700, fontSize: 26, color: '#4A4A4A' }}>Payments</h1>
           <button
             style={{ width: 42, height: 42, borderRadius: 10, background: '#F0EEEB', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
             aria-label="Download payment history"
@@ -129,11 +122,11 @@ export default function TenantPaymentHistory() {
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr' }}>
               <div style={{ paddingRight: 16, borderRight: '1px solid #C9A84C' }}>
                 <p style={{ fontFamily: 'Inter', fontWeight: 700, fontSize: 11, color: '#C9A84C', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 6 }}>PAID</p>
-                <p style={{ fontFamily: '"Playfair Display", Georgia, serif', fontWeight: 700, fontSize: 22, color: '#2E7D72' }}>{formatPeso(summary.totalPaid)}</p>
+                <p style={{ fontFamily: 'Inter', fontWeight: 700, fontSize: 22, color: '#2E7D72' }}>{formatPeso(summary.totalPaid)}</p>
               </div>
               <div style={{ paddingLeft: 16 }}>
                 <p style={{ fontFamily: 'Inter', fontWeight: 700, fontSize: 11, color: '#C9A84C', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 6 }}>PENDING</p>
-                <p style={{ fontFamily: '"Playfair Display", Georgia, serif', fontWeight: 700, fontSize: 22, color: '#E07B39' }}>{formatPeso(summary.totalPending)}</p>
+                <p style={{ fontFamily: 'Inter', fontWeight: 700, fontSize: 22, color: '#E07B39' }}>{formatPeso(summary.totalPending)}</p>
               </div>
             </div>
           </div>
@@ -179,11 +172,10 @@ export default function TenantPaymentHistory() {
           ) : (
             grouped.map(([month, entries]) => (
               <div key={month}>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8, paddingLeft: 2, paddingRight: 2 }}>
-                  <p style={{ fontFamily: '"Playfair Display", Georgia, serif', fontWeight: 600, fontSize: 16, color: '#4A4A4A' }}>
+                <div style={{ marginBottom: 8, paddingLeft: 2, paddingRight: 2 }}>
+                  <p style={{ fontFamily: 'Inter', fontWeight: 600, fontSize: 16, color: '#4A4A4A' }}>
                     {formatMonthYear(month)}
                   </p>
-                  <StatusBadge status={getMonthStatus(entries)} />
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                   {entries.map((entry) => {
@@ -327,7 +319,7 @@ export default function TenantPaymentHistory() {
 
       </div>
 
-      <BottomNav role="tenant" />
     </div>
+    </TenantLayout>
   );
 }

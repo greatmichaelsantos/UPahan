@@ -111,7 +111,7 @@ export default function LoginPage() {
           <svg width="22" height="22" viewBox="0 0 32 32" fill="none" aria-hidden="true">
             <path d="M16 3L3 14h3v14h8v-8h4v8h8V14h3L16 3z" fill={accent} />
           </svg>
-          <span style={{ fontFamily: '"Playfair Display", Georgia, serif', fontWeight: 700, fontSize: 18, color: accent }}>
+          <span style={{ fontFamily: 'Inter', fontWeight: 700, fontSize: 18, color: accent }}>
             UPAHAN
           </span>
         </div>
@@ -127,7 +127,7 @@ export default function LoginPage() {
           </span>
         </div>
 
-        <h1 style={{ fontFamily: '"Playfair Display", Georgia, serif', fontWeight: 700, fontSize: 30, color: '#4A4A4A', textAlign: 'center', marginBottom: 4 }}>
+        <h1 style={{ fontFamily: 'Inter', fontWeight: 700, fontSize: 30, color: '#4A4A4A', textAlign: 'center', marginBottom: 4 }}>
           Welcome
         </h1>
 

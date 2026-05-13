@@ -49,7 +49,7 @@ export default function AdminMaintenanceDetail() {
   };
 
   if (loading) return (
-    <AdminLayout>
+    <AdminLayout title="Maintenance">
       <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         <div style={{ width: 32, height: 32, border: '4px solid #E8F5F3', borderTopColor: '#2E7D72', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
       </div>
@@ -58,7 +58,7 @@ export default function AdminMaintenanceDetail() {
   if (!req) return null;
 
   return (
-    <AdminLayout>
+    <AdminLayout title="Maintenance">
       {/* Back link */}
       <div style={{ padding: '16px 20px 0' }}>
         <button
@@ -72,7 +72,7 @@ export default function AdminMaintenanceDetail() {
       {/* Title row */}
       <div style={{ padding: '16px 20px', display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12 }}>
         <div style={{ flex: 1 }}>
-          <h1 style={{ fontFamily: '"Playfair Display", Georgia, serif', fontWeight: 700, fontSize: 26, color: '#4A4A4A', marginBottom: 4 }}>
+          <h1 style={{ fontFamily: 'Inter', fontWeight: 700, fontSize: 26, color: '#4A4A4A', marginBottom: 4 }}>
             {req.subject}
           </h1>
           <p style={{ fontFamily: 'Inter', fontSize: 13, color: '#888888' }}>{categoryLabel(req.issue_category)}</p>

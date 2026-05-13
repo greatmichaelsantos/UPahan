@@ -172,7 +172,7 @@ export default function PaymentDeclarationModal({ unit, monthlyRent, onClose, on
             <p style={{ fontFamily: 'Inter', fontWeight: 700, fontSize: 11, color: 'rgba(255,255,255,0.7)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 4 }}>
               PAYMENT
             </p>
-            <h2 style={{ fontFamily: '"Playfair Display", Georgia, serif', fontWeight: 700, fontSize: 22, color: 'white' }}>
+            <h2 style={{ fontFamily: 'Inter', fontWeight: 700, fontSize: 22, color: 'white' }}>
               Submit Payment
             </h2>
           </div>
@@ -191,7 +191,7 @@ export default function PaymentDeclarationModal({ unit, monthlyRent, onClose, on
             </div>
             <div style={{ textAlign: 'right' }}>
               <p style={{ fontFamily: 'Inter', fontSize: 12, color: '#888888', marginBottom: 2 }}>Monthly Rent</p>
-              <p style={{ fontFamily: '"Playfair Display", Georgia, serif', fontWeight: 700, fontSize: 15, color: '#3A7BD5' }}>{formatPeso(monthlyRent)}</p>
+              <p style={{ fontFamily: 'Inter', fontWeight: 700, fontSize: 15, color: '#3A7BD5' }}>{formatPeso(monthlyRent)}</p>
             </div>
           </div>
 

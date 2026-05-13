@@ -47,7 +47,7 @@ export default function RoleSelectPage() {
           <svg width="26" height="26" viewBox="0 0 32 32" fill="none" aria-hidden="true">
             <path d="M16 3L3 14h3v14h8v-8h4v8h8V14h3L16 3z" fill="#2E7D72" />
           </svg>
-          <span style={{ fontFamily: '"Playfair Display", Georgia, serif', fontWeight: 700, fontSize: 22, color: '#2E7D72' }}>
+          <span style={{ fontFamily: 'Inter', fontWeight: 700, fontSize: 22, color: '#2E7D72' }}>
             UPAHAN
           </span>
         </div>
@@ -55,7 +55,7 @@ export default function RoleSelectPage() {
           RGT Real Estate Marketing
         </p>
 
-        <h2 style={{ fontFamily: '"Playfair Display", Georgia, serif', fontWeight: 700, fontSize: 32, color: '#4A4A4A', marginBottom: 8 }}>
+        <h2 style={{ fontFamily: 'Inter', fontWeight: 700, fontSize: 32, color: '#4A4A4A', marginBottom: 8 }}>
           Login As
         </h2>
         <p style={{ fontFamily: 'Inter', fontSize: 14, color: '#888888' }}>

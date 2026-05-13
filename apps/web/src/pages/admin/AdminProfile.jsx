@@ -92,7 +92,7 @@ function ChangePasswordModal({ onClose }) {
     >
       <div className="w-full md:max-w-md" style={{ background: 'white', borderRadius: '20px 20px 0 0', padding: '24px 20px 36px' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
-          <h2 style={{ fontFamily: '"Playfair Display",Georgia,serif', fontWeight: 700, fontSize: 20, color: '#4A4A4A' }}>
+          <h2 style={{ fontFamily: 'Inter', fontWeight: 700, fontSize: 20, color: '#4A4A4A' }}>
             Change Password
           </h2>
           <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4, display: 'flex' }}>
@@ -151,7 +151,7 @@ function LogoutModal({ onConfirm, onClose }) {
         <div style={{ width: 56, height: 56, borderRadius: '50%', background: '#FEF2F2', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
           <LogOut size={24} color={RED} />
         </div>
-        <h2 style={{ fontFamily: '"Playfair Display",Georgia,serif', fontWeight: 700, fontSize: 20, color: '#4A4A4A', marginBottom: 8 }}>
+        <h2 style={{ fontFamily: 'Inter', fontWeight: 700, fontSize: 20, color: '#4A4A4A', marginBottom: 8 }}>
           Log Out?
         </h2>
         <p style={{ fontFamily: 'Inter', fontSize: 14, color: '#888', marginBottom: 24, lineHeight: 1.5 }}>
@@ -250,7 +250,7 @@ export default function AdminProfile() {
   const initials = `${profile?.first_name?.[0] || ''}${profile?.last_name?.[0] || ''}`.toUpperCase() || 'A';
 
   return (
-    <AdminLayout>
+    <AdminLayout title="Profile">
       <div style={{ minHeight: '100vh', background: CREAM, paddingBottom: 90 }}>
 
         {/* Profile header */}
@@ -262,7 +262,7 @@ export default function AdminProfile() {
           }}>
             <span style={{ fontFamily: 'Inter', fontWeight: 700, fontSize: 28, color: 'white' }}>{initials}</span>
           </div>
-          <p style={{ fontFamily: '"Playfair Display",Georgia,serif', fontWeight: 700, fontSize: 20, color: '#4A4A4A', marginBottom: 4 }}>
+          <p style={{ fontFamily: 'Inter', fontWeight: 700, fontSize: 20, color: '#4A4A4A', marginBottom: 4 }}>
             {profile ? `${profile.first_name} ${profile.last_name}` : '—'}
           </p>
           <p style={{ fontFamily: 'Inter', fontSize: 13, color: '#888888' }}>
