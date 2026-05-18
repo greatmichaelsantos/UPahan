@@ -1,13 +1,14 @@
 import React, { useState, useCallback, useRef } from 'react';
 import {
   View, Text, FlatList, StyleSheet, TouchableOpacity,
-  RefreshControl, Alert, ActivityIndicator, StatusBar
+  RefreshControl, Alert, ActivityIndicator, StatusBar,
+  Image, Modal, TextInput, KeyboardAvoidingView, Platform, ScrollView,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect } from '@react-navigation/native';
 import { API_ROUTES, formatPeso, formatDate } from '@upahan/shared';
-import api from '../../api/client';
+import api, { BASE_URL } from '../../api/client';
 import StatusBadge from '../../components/StatusBadge';
 import EmptyState from '../../components/EmptyState';
 import LoadingScreen from '../../components/LoadingScreen';
@@ -24,6 +25,10 @@ export default function AdminPaymentRequests({ navigation }) {
   const [loading, setLoading]       = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [processing, setProcessing] = useState(null);
+
+  const [rejectModal, setRejectModal] = useState({ visible: false, payment: null });
+  const [rejectReason, setRejectReason] = useState('');
+  const [expandedImage, setExpandedImage] = useState(null);
 
   const intervalRef = useRef(null);
 
@@ -65,22 +70,23 @@ export default function AdminPaymentRequests({ navigation }) {
   };
 
   const handleReject = payment => {
-    Alert.alert('Reject Payment', `Reject ${formatPeso(payment.amount)} from ${payment.tenant_name}?`, [
-      { text: 'Cancel', style: 'cancel' },
-      {
-        text: 'Reject', style: 'destructive',
-        onPress: async () => {
-          setProcessing(payment.payment_id);
-          try {
-            await api.put(API_ROUTES.paymentReject(payment.payment_id), { rejectionReason: 'Rejected by admin' });
-            fetchPayments();
-          } catch (e) {
-            Alert.alert('Error', e.response?.data?.message || 'Rejection failed.');
-          }
-          setProcessing(null);
-        },
-      },
-    ]);
+    setRejectReason('');
+    setRejectModal({ visible: true, payment });
+  };
+
+  const confirmReject = async () => {
+    const { payment } = rejectModal;
+    setRejectModal({ visible: false, payment: null });
+    setProcessing(payment.payment_id);
+    try {
+      await api.put(API_ROUTES.paymentReject(payment.payment_id), {
+        rejectionReason: rejectReason.trim() || 'Rejected by landlord',
+      });
+      fetchPayments();
+    } catch (e) {
+      Alert.alert('Error', e.response?.data?.message || 'Rejection failed.');
+    }
+    setProcessing(null);
   };
 
   if (loading) return <LoadingScreen />;
@@ -117,6 +123,10 @@ export default function AdminPaymentRequests({ navigation }) {
           const isProcessing  = processing === item.payment_id;
           const initials      = item.tenant_name?.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() || '?';
           const avatarColor   = AVATAR_COLORS[index % AVATAR_COLORS.length];
+          const proofImages   = (item.proof_images?.length > 0
+            ? item.proof_images
+            : item.proof_of_payment ? [item.proof_of_payment] : []
+          ).map(p => `${BASE_URL}${p}`);
           return (
             <View style={s.card}>
               <View style={s.topBar} />
@@ -168,7 +178,36 @@ export default function AdminPaymentRequests({ navigation }) {
                   <Text style={s.notes} numberOfLines={2}>"{item.notes}"</Text>
                 ) : null}
 
-                {/* Action buttons — APPROVE left, REJECT right */}
+                {/* Proof of payment thumbnails */}
+                {proofImages.length > 0 ? (
+                  <ScrollView horizontal showsHorizontalScrollIndicator={false} style={s.proofStrip}>
+                    {proofImages.map((uri, idx) => (
+                      <TouchableOpacity
+                        key={idx}
+                        style={s.proofThumbWrap}
+                        onPress={() => setExpandedImage(uri)}
+                        activeOpacity={0.85}
+                      >
+                        <Image source={{ uri }} style={s.proofThumb} resizeMode="cover" />
+                        <View style={s.proofOverlay}>
+                          <Ionicons name="expand-outline" size={14} color="#fff" />
+                        </View>
+                        {proofImages.length > 1 && (
+                          <View style={s.proofIndexBadge}>
+                            <Text style={s.proofIndexText}>{idx + 1}</Text>
+                          </View>
+                        )}
+                      </TouchableOpacity>
+                    ))}
+                  </ScrollView>
+                ) : (
+                  <View style={s.noProofRow}>
+                    <Ionicons name="image-outline" size={14} color={COLORS.textMuted} />
+                    <Text style={s.noProofText}>No proof of payment uploaded</Text>
+                  </View>
+                )}
+
+                {/* Action buttons */}
                 <View style={s.actions}>
                   <TouchableOpacity
                     style={[s.approveBtn, isProcessing && { opacity: 0.5 }]}
@@ -200,6 +239,71 @@ export default function AdminPaymentRequests({ navigation }) {
           );
         }}
       />
+
+      {/* Reject reason modal */}
+      <Modal
+        visible={rejectModal.visible}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setRejectModal({ visible: false, payment: null })}
+      >
+        <KeyboardAvoidingView
+          style={s.modalOverlay}
+          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        >
+          <View style={s.modalCard}>
+            <Text style={s.modalTitle}>Reject Payment</Text>
+            {rejectModal.payment && (
+              <Text style={s.modalSubtitle}>
+                {rejectModal.payment.tenant_name} · {formatPeso(rejectModal.payment.amount)}
+              </Text>
+            )}
+            <Text style={s.modalInputLabel}>Reason for rejection</Text>
+            <TextInput
+              style={s.reasonInput}
+              placeholder="e.g. Amount does not match, unclear proof..."
+              placeholderTextColor={COLORS.textMuted}
+              value={rejectReason}
+              onChangeText={setRejectReason}
+              multiline
+              numberOfLines={3}
+              textAlignVertical="top"
+            />
+            <View style={s.modalActions}>
+              <TouchableOpacity
+                style={s.modalCancelBtn}
+                onPress={() => setRejectModal({ visible: false, payment: null })}
+              >
+                <Text style={s.modalCancelText}>Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={s.modalRejectBtn} onPress={confirmReject}>
+                <Text style={s.modalRejectText}>Confirm Reject</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </KeyboardAvoidingView>
+      </Modal>
+
+      {/* Full-screen image viewer */}
+      <Modal
+        visible={!!expandedImage}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setExpandedImage(null)}
+      >
+        <View style={s.imageOverlay}>
+          <TouchableOpacity style={s.imageCloseBtn} onPress={() => setExpandedImage(null)}>
+            <Ionicons name="close" size={26} color="#fff" />
+          </TouchableOpacity>
+          {expandedImage && (
+            <Image
+              source={{ uri: expandedImage }}
+              style={s.imageFull}
+              resizeMode="contain"
+            />
+          )}
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -211,7 +315,7 @@ const s = StyleSheet.create({
     backgroundColor: TEAL, paddingHorizontal: 20, paddingTop: 20, paddingBottom: 24,
   },
   headerLabel: { fontSize: 11, fontWeight: '700', color: GOLD, letterSpacing: 1.5, marginBottom: 4 },
-  headerTitle: { fontSize: 28, fontWeight: '700', fontFamily: 'serif', color: '#fff' },
+  headerTitle: { fontSize: 28, fontWeight: '700', fontFamily: 'Inter_700Bold', color: '#fff' },
   countBadge: {
     backgroundColor: 'rgba(255,255,255,0.2)',
     width: 36, height: 36, borderRadius: 18,
@@ -230,7 +334,7 @@ const s = StyleSheet.create({
   tenantName: { fontSize: 15, fontWeight: '700', color: COLORS.textPrimary },
   unitMeta:   { fontSize: 12, color: COLORS.textSecondary, marginTop: 2 },
   amountSub:  { fontSize: 11, color: COLORS.textSecondary, textAlign: 'right', marginTop: 2 },
-  amount:     { fontSize: 18, fontWeight: '800', fontFamily: 'serif', color: COLORS.textPrimary },
+  amount:     { fontSize: 18, fontFamily: 'Inter_800ExtraBold', color: COLORS.textPrimary },
   detailsGrid:{ flexDirection: 'row', gap: 12, marginBottom: 10 },
   detailItem: { flex: 1 },
   detailLabel:{ fontSize: 10, fontWeight: '700', color: GOLD, letterSpacing: 1, marginBottom: 2 },
@@ -240,7 +344,31 @@ const s = StyleSheet.create({
   monthRow:   { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 },
   refLabel:   { fontSize: 10, fontWeight: '700', color: GOLD, letterSpacing: 1 },
   refValue:   { fontSize: 13, fontWeight: '600', color: COLORS.textPrimary },
-  actions:    { flexDirection: 'row', gap: 10 },
+
+  proofStrip:     { flexDirection: 'row', marginBottom: 12 },
+  proofThumbWrap: { position: 'relative', marginRight: 8, borderRadius: 10, overflow: 'hidden', height: 100, width: 100 },
+  proofThumb:     { width: '100%', height: '100%' },
+  proofOverlay: {
+    position: 'absolute', bottom: 0, left: 0, right: 0,
+    alignItems: 'center', justifyContent: 'center',
+    backgroundColor: 'rgba(0,0,0,0.35)', paddingVertical: 4,
+  },
+  proofIndexBadge: {
+    position: 'absolute', top: 4, left: 4,
+    backgroundColor: 'rgba(0,0,0,0.55)',
+    borderRadius: 999, width: 20, height: 20,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  proofIndexText: { fontSize: 10, fontWeight: '700', color: '#fff' },
+  noProofRow: {
+    flexDirection: 'row', alignItems: 'center', gap: 6,
+    marginBottom: 12, paddingVertical: 8,
+    borderWidth: 1, borderColor: COLORS.borderLight, borderRadius: 8,
+    paddingHorizontal: 12, backgroundColor: COLORS.inputBg,
+  },
+  noProofText: { fontSize: 12, color: COLORS.textMuted, fontStyle: 'italic' },
+
+  actions:    { flexDirection: 'row', gap: 10, marginTop: 4 },
   rejectBtn: {
     flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6,
     paddingVertical: 12, borderRadius: 999, borderWidth: 1.5, borderColor: COLORS.dangerPrimary,
@@ -250,4 +378,47 @@ const s = StyleSheet.create({
     paddingVertical: 12, borderRadius: 999, backgroundColor: TEAL,
   },
   btnLabel: { fontSize: 13, fontWeight: '700' },
+
+  /* Reject modal */
+  modalOverlay: {
+    flex: 1, backgroundColor: 'rgba(0,0,0,0.55)',
+    alignItems: 'center', justifyContent: 'center', padding: 24,
+  },
+  modalCard: {
+    width: '100%', backgroundColor: '#fff', borderRadius: 20,
+    padding: 24,
+    shadowColor: '#000', shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.2, shadowRadius: 20, elevation: 10,
+  },
+  modalTitle:      { fontSize: 20, fontWeight: '700', color: COLORS.textPrimary, marginBottom: 4 },
+  modalSubtitle:   { fontSize: 13, color: COLORS.textSecondary, marginBottom: 16 },
+  modalInputLabel: { fontSize: 11, fontWeight: '700', color: GOLD, letterSpacing: 1, marginBottom: 8 },
+  reasonInput: {
+    borderWidth: 1.5, borderColor: COLORS.inputBorder, borderRadius: 12,
+    padding: 12, fontSize: 14, color: COLORS.textPrimary,
+    backgroundColor: COLORS.inputBg, minHeight: 90, marginBottom: 20,
+  },
+  modalActions:     { flexDirection: 'row', gap: 10 },
+  modalCancelBtn: {
+    flex: 1, paddingVertical: 14, borderRadius: 999,
+    borderWidth: 1.5, borderColor: COLORS.borderLight, alignItems: 'center',
+  },
+  modalCancelText:  { fontSize: 14, fontWeight: '700', color: COLORS.textSecondary },
+  modalRejectBtn: {
+    flex: 1, paddingVertical: 14, borderRadius: 999,
+    backgroundColor: COLORS.dangerPrimary, alignItems: 'center',
+  },
+  modalRejectText: { fontSize: 14, fontWeight: '700', color: '#fff' },
+
+  /* Image viewer */
+  imageOverlay: {
+    flex: 1, backgroundColor: 'rgba(0,0,0,0.92)',
+    alignItems: 'center', justifyContent: 'center',
+  },
+  imageCloseBtn: {
+    position: 'absolute', top: 52, right: 20, zIndex: 10,
+    backgroundColor: 'rgba(255,255,255,0.15)',
+    width: 44, height: 44, borderRadius: 22,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  imageFull: { width: '100%', height: '80%' },
 });

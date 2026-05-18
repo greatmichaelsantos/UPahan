@@ -16,7 +16,7 @@ const TEAL = COLORS.landlordPrimary;
 const GOLD = COLORS.goldAccent;
 
 const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
-const METHODS   = ['GCash', 'Bank Transfer', 'Cash', 'Other'];
+const METHODS   = ['GCash', 'Maya', 'Bank Transfer', 'Cash', 'Other'];
 const PAY_TYPES = [
   { value: 'full',    label: 'Full Payment' },
   { value: 'partial', label: 'Partial Payment' },
@@ -42,20 +42,24 @@ export default function TenantPaymentDeclare({ navigation, route }) {
     monthCovered: getCurrentMonth(),
     notes:        '',
   });
-  const [loading, setLoading]     = useState(false);
-  const [proofImage, setProofImage] = useState(null);
+  const [loading, setLoading]       = useState(false);
+  const [proofImages, setProofImages] = useState([]);
   const [advanceMonths, setAdvanceMonths] = useState(1);
+  const [referenceNumber, setReferenceNumber] = useState('');
+  const [fieldErrors, setFieldErrors] = useState({ amount: '', method: '', referenceNumber: '', proof: '' });
 
   const set = (key) => (val) => setForm(f => ({ ...f, [key]: val }));
 
   const handleTypeChange = (type) => {
     set('paymentType')(type);
-    if (type !== 'advance') {
-      setAdvanceMonths(1);
-    } else {
+    if (type === 'full') {
+      set('amount')(String(Number(tenantInfo?.monthly_price || 0)));
+    } else if (type === 'advance') {
       setAdvanceMonths(1);
       const multiplier = isPaid ? 1 : 2;
       set('amount')(String(Number(tenantInfo?.monthly_price || 0) * multiplier));
+    } else {
+      setAdvanceMonths(1);
     }
   };
 
@@ -82,7 +86,11 @@ export default function TenantPaymentDeclare({ navigation, route }) {
     return `${fmt(startDate)} to ${fmt(endDate)}`;
   };
 
-  const handlePickProofImage = async () => {
+  const handlePickProofImages = async () => {
+    if (proofImages.length >= 5) {
+      Alert.alert('Maximum reached', 'You can attach up to 5 photos.');
+      return;
+    }
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (status !== 'granted') {
       Alert.alert('Permission needed', 'Please allow access to your photo library.');
@@ -90,36 +98,68 @@ export default function TenantPaymentDeclare({ navigation, route }) {
     }
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsMultipleSelection: true,
       quality: 0.8,
-      allowsEditing: false,
     });
-    if (!result.canceled && result.assets?.[0]) {
-      setProofImage(result.assets[0]);
+    if (!result.canceled && result.assets?.length > 0) {
+      setProofImages(prev => [...prev, ...result.assets].slice(0, 5));
+      setFieldErrors(e => ({ ...e, proof: '' }));
     }
   };
 
+  const removeProofImage = (index) => {
+    setProofImages(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const requiresReference = form.method !== 'Cash';
+
   const handleSubmit = async () => {
-    if (!form.amount || isNaN(parseFloat(form.amount))) {
-      return Alert.alert('Invalid', 'Please enter a valid amount.');
+    const errors = { amount: '', method: '', referenceNumber: '', proof: '' };
+    let hasError = false;
+
+    if (!form.amount || isNaN(parseFloat(form.amount)) || parseFloat(form.amount) <= 0) {
+      errors.amount = 'Please enter a valid amount greater than 0.';
+      hasError = true;
     }
-    if (form.paymentType !== 'advance' && !form.monthCovered) {
-      return Alert.alert('Required', 'Month covered is required.');
+    if (requiresReference && !referenceNumber.trim()) {
+      errors.referenceNumber = 'Reference number is required for this payment method.';
+      hasError = true;
     }
+    if (proofImages.length === 0) {
+      errors.proof = 'Please attach at least one proof of payment.';
+      hasError = true;
+    }
+    if (hasError) {
+      setFieldErrors(errors);
+      return;
+    }
+    setFieldErrors({ amount: '', method: '', referenceNumber: '', proof: '' });
+
     const monthCovered = form.paymentType === 'advance'
       ? getAdvanceMonthCovered(advanceMonths)
-      : form.monthCovered;
+      : getCurrentMonth();
     setLoading(true);
     try {
-      await api.post(API_ROUTES.PAYMENT_DECLARE, {
-        amountPaid:    parseFloat(form.amount),
-        paymentMethod: form.method,
-        paymentType:   form.paymentType,
-        monthCovered,
-        notes:         form.notes.trim(),
-        paymentDate:   new Date().toISOString().split('T')[0],
+      const fd = new FormData();
+      fd.append('amountPaid', String(parseFloat(form.amount)));
+      fd.append('paymentMethod', form.method);
+      fd.append('paymentType', form.paymentType);
+      fd.append('monthCovered', monthCovered);
+      fd.append('paymentDate', new Date().toISOString().split('T')[0]);
+      if (referenceNumber.trim()) fd.append('referenceNumber', referenceNumber.trim());
+      if (form.notes.trim()) fd.append('notes', form.notes.trim());
+      proofImages.forEach((img, i) => {
+        const uriParts = img.uri.split('.');
+        const ext = uriParts[uriParts.length - 1] || 'jpg';
+        fd.append('proof_images', {
+          uri: img.uri,
+          type: `image/${ext === 'jpg' ? 'jpeg' : ext}`,
+          name: img.fileName || `proof_${i}.${ext}`,
+        });
       });
+      await api.post(API_ROUTES.PAYMENT_DECLARE, fd, { headers: { 'Content-Type': 'multipart/form-data' } });
       Alert.alert('Submitted!', 'Your payment declaration has been submitted for approval.', [
-        { text: 'OK', onPress: () => navigation.goBack() },
+        { text: 'OK', onPress: () => navigation.navigate('TenantTabs', { screen: 'Payments' }) },
       ]);
     } catch (e) {
       Alert.alert('Error', e.response?.data?.message || 'Submission failed.');
@@ -146,7 +186,12 @@ export default function TenantPaymentDeclare({ navigation, route }) {
       >
         {tenantInfo && (
           <View style={s.rentCard}>
-            <Text style={s.rentLabel}>MONTHLY RENT</Text>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+              <Text style={s.rentLabel}>MONTHLY RENT</Text>
+              <View style={s.declareBadge}>
+                <Text style={s.declareBadgeText}>+ DECLARE</Text>
+              </View>
+            </View>
             <Text style={s.rentAmount}>{formatPeso(tenantInfo.monthly_price || 0)}</Text>
             <Text style={s.rentUnit}>
               {tenantInfo.unit_code ? `Unit ${tenantInfo.unit_code}` : ''}
@@ -203,34 +248,28 @@ export default function TenantPaymentDeclare({ navigation, route }) {
           </>
         )}
 
+        {form.paymentType === 'partial' && (
+          <View style={s.partialHint}>
+            <Text style={s.partialHintText}>
+              Enter the amount you are paying now. You can submit another partial declaration after this one is approved.
+            </Text>
+          </View>
+        )}
+
         <Text style={s.fieldLabel}>AMOUNT *</Text>
-        <View style={s.inputWrap}>
+        <View style={[s.inputWrap, form.paymentType === 'full' && { backgroundColor: COLORS.inputBg, opacity: 0.7 }, fieldErrors.amount && s.inputWrapError]}>
           <Ionicons name="cash-outline" size={18} color={COLORS.textMuted} style={{ marginRight: 10 }} />
           <TextInput
             style={s.inputField}
             value={form.amount}
-            onChangeText={set('amount')}
+            onChangeText={v => { set('amount')(v); setFieldErrors(e => ({ ...e, amount: '' })); }}
             keyboardType="decimal-pad"
             placeholder="0.00"
             placeholderTextColor={COLORS.textMuted}
+            editable={form.paymentType !== 'full'}
           />
         </View>
-
-        {/* Month Covered — picker style, hidden for advance (auto-calculated) */}
-        {form.paymentType !== 'advance' && (
-          <>
-            <Text style={s.fieldLabel}>MONTH COVERED *</Text>
-            <View style={s.monthPicker}>
-              <TouchableOpacity onPress={() => changeMonth(-1)} style={s.monthChevron}>
-                <Ionicons name="chevron-back" size={20} color={BLUE} />
-              </TouchableOpacity>
-              <Text style={s.monthDisplay}>{formatDisplayMonth(form.monthCovered)}</Text>
-              <TouchableOpacity onPress={() => changeMonth(1)} style={s.monthChevron}>
-                <Ionicons name="chevron-forward" size={20} color={BLUE} />
-              </TouchableOpacity>
-            </View>
-          </>
-        )}
+        {fieldErrors.amount ? <Text style={s.inlineError}>{fieldErrors.amount}</Text> : null}
 
         <Text style={s.fieldLabel}>PAYMENT METHOD</Text>
         <View style={s.methodRow}>
@@ -238,12 +277,30 @@ export default function TenantPaymentDeclare({ navigation, route }) {
             <TouchableOpacity
               key={m}
               style={[s.methodChip, form.method === m && s.methodChipActive]}
-              onPress={() => set('method')(m)}
+              onPress={() => { set('method')(m); setFieldErrors(e => ({ ...e, referenceNumber: '' })); }}
             >
               <Text style={[s.methodText, form.method === m && s.methodTextActive]}>{m}</Text>
             </TouchableOpacity>
           ))}
         </View>
+
+        {requiresReference && (
+          <>
+            <Text style={s.fieldLabel}>REFERENCE NUMBER *</Text>
+            <View style={[s.inputWrap, fieldErrors.referenceNumber && s.inputWrapError]}>
+              <Ionicons name="receipt-outline" size={18} color={COLORS.textMuted} style={{ marginRight: 10 }} />
+              <TextInput
+                style={s.inputField}
+                value={referenceNumber}
+                onChangeText={v => { setReferenceNumber(v); setFieldErrors(e => ({ ...e, referenceNumber: '' })); }}
+                placeholder="e.g. GCash ref. number"
+                placeholderTextColor={COLORS.textMuted}
+                autoCapitalize="characters"
+              />
+            </View>
+            {fieldErrors.referenceNumber ? <Text style={s.inlineError}>{fieldErrors.referenceNumber}</Text> : null}
+          </>
+        )}
 
         <Text style={s.fieldLabel}>NOTES <Text style={s.optional}>(optional)</Text></Text>
         <TextInput
@@ -257,28 +314,37 @@ export default function TenantPaymentDeclare({ navigation, route }) {
           textAlignVertical="top"
         />
 
-        {/* PROOF OF PAYMENT */}
-        <Text style={s.fieldLabel}>PROOF OF PAYMENT <Text style={s.optional}>(optional)</Text></Text>
-        {proofImage ? (
-          <View style={s.proofSelected}>
-            <Image source={{ uri: proofImage.uri }} style={s.proofThumb} resizeMode="cover" />
-            <View style={{ flex: 1, marginLeft: 12 }}>
-              <Text style={s.proofFileName} numberOfLines={1}>
-                {proofImage.fileName || 'Image selected'}
-              </Text>
-              <Text style={s.proofFileSize}>
-                {proofImage.fileSize ? `${(proofImage.fileSize / 1024).toFixed(0)} KB` : 'Ready to submit'}
-              </Text>
-            </View>
-            <TouchableOpacity onPress={() => setProofImage(null)} style={s.proofRemove}>
-              <Ionicons name="close-circle" size={20} color={COLORS.textMuted} />
-            </TouchableOpacity>
-          </View>
-        ) : (
-          <TouchableOpacity style={s.uploadZone} onPress={handlePickProofImage} activeOpacity={0.75}>
-            <Ionicons name="cloud-upload-outline" size={32} color={BLUE} />
-            <Text style={s.uploadZoneMainText}>Upload screenshot or receipt</Text>
-            <Text style={s.uploadZoneSubText}>JPG, PNG up to 5MB</Text>
+        {/* PROOF OF PAYMENT — required, up to 5 */}
+        <View style={s.proofHeaderRow}>
+          <Text style={s.fieldLabel}>PROOF OF PAYMENT *</Text>
+          <Text style={s.photoCounter}>{proofImages.length}/5</Text>
+        </View>
+        {fieldErrors.proof ? <Text style={[s.inlineError, { marginTop: -4 }]}>{fieldErrors.proof}</Text> : null}
+
+        {proofImages.length > 0 && (
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={s.thumbRow}>
+            {proofImages.map((img, i) => (
+              <View key={i} style={s.thumbWrap}>
+                <Image source={{ uri: img.uri }} style={s.proofThumb} resizeMode="cover" />
+                <TouchableOpacity style={s.removeBtn} onPress={() => removeProofImage(i)}>
+                  <Ionicons name="close-circle" size={20} color={COLORS.dangerPrimary} />
+                </TouchableOpacity>
+              </View>
+            ))}
+          </ScrollView>
+        )}
+
+        {proofImages.length < 5 && (
+          <TouchableOpacity
+            style={[s.uploadZone, fieldErrors.proof && s.uploadZoneError]}
+            onPress={handlePickProofImages}
+            activeOpacity={0.75}
+          >
+            <Ionicons name="cloud-upload-outline" size={28} color={fieldErrors.proof ? COLORS.dangerPrimary : BLUE} />
+            <Text style={[s.uploadZoneMainText, fieldErrors.proof && { color: COLORS.dangerPrimary }]}>
+              {proofImages.length === 0 ? 'Upload screenshot or receipt' : 'Add more photos'}
+            </Text>
+            <Text style={s.uploadZoneSubText}>JPG, PNG up to 5MB · at least 1 required</Text>
           </TouchableOpacity>
         )}
 
@@ -308,16 +374,18 @@ const s = StyleSheet.create({
   },
   backBtn:   { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 8 },
   backText:  { fontSize: 13, color: BLUE, fontWeight: '500' },
-  pageTitle: { fontSize: 26, fontWeight: '700', fontFamily: 'serif', color: COLORS.textPrimary },
+  pageTitle: { fontSize: 26, fontWeight: '700', fontFamily: 'Inter_700Bold', color: COLORS.textPrimary },
   scroll:    { padding: 20, paddingBottom: 48 },
   rentCard: {
-    backgroundColor: TEAL, borderRadius: 16, padding: 22,
-    marginBottom: 8, alignItems: 'center',
-    shadowColor: TEAL, shadowOffset: { width: 0, height: 6 },
+    backgroundColor: BLUE, borderRadius: 16, padding: 22,
+    marginBottom: 8,
+    shadowColor: BLUE, shadowOffset: { width: 0, height: 6 },
     shadowOpacity: 0.3, shadowRadius: 12, elevation: 6,
   },
+  declareBadge: { backgroundColor: 'rgba(255,255,255,0.25)', borderRadius: 999, paddingHorizontal: 10, paddingVertical: 3 },
+  declareBadgeText: { fontSize: 10, fontWeight: '700', color: '#fff', letterSpacing: 0.8 },
   rentLabel:  { fontSize: 11, fontWeight: '700', color: 'rgba(255,255,255,0.7)', letterSpacing: 1.5, marginBottom: 6 },
-  rentAmount: { fontSize: 36, fontWeight: '800', fontFamily: 'serif', color: '#fff', marginBottom: 4 },
+  rentAmount: { fontSize: 36, fontFamily: 'Inter_800ExtraBold', color: '#fff', marginBottom: 4 },
   rentUnit:   { fontSize: 13, color: 'rgba(255,255,255,0.7)' },
   fieldLabel: {
     fontSize: 11, fontWeight: '700', color: GOLD,
@@ -345,6 +413,8 @@ const s = StyleSheet.create({
     backgroundColor: COLORS.inputBg, borderRadius: 12, height: 52, paddingHorizontal: 14,
     borderWidth: 1, borderColor: COLORS.inputBorder,
   },
+  inputWrapError: { borderColor: COLORS.dangerPrimary, borderWidth: 1.5, backgroundColor: '#FEF2F2' },
+  inlineError: { fontSize: 12, color: COLORS.dangerPrimary, marginTop: 4, marginBottom: 4 },
   inputField: { flex: 1, fontSize: 14, color: COLORS.textPrimary },
   monthPicker: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
@@ -352,7 +422,7 @@ const s = StyleSheet.create({
     borderWidth: 1.5, borderColor: BLUE,
   },
   monthChevron: { width: 36, height: 36, alignItems: 'center', justifyContent: 'center' },
-  monthDisplay: { fontSize: 16, fontWeight: '700', color: BLUE, fontFamily: 'serif' },
+  monthDisplay: { fontSize: 16, fontWeight: '700', color: BLUE, fontFamily: 'Inter_700Bold' },
   inputMulti: {
     backgroundColor: COLORS.inputBg, borderRadius: 12, height: 100,
     paddingHorizontal: 14, paddingTop: 14, fontSize: 14, color: COLORS.textPrimary,
@@ -372,22 +442,20 @@ const s = StyleSheet.create({
   },
   submitText: { color: '#fff', fontWeight: '700', fontSize: 14, letterSpacing: 1 },
   hint: { fontSize: 12, color: COLORS.textSecondary, textAlign: 'center', marginTop: 14, lineHeight: 18 },
+  proofHeaderRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 16, marginBottom: 8 },
+  photoCounter: { fontSize: 12, fontWeight: '700', color: COLORS.textMuted },
+  thumbRow: { marginBottom: 8 },
+  thumbWrap: { position: 'relative', marginRight: 8 },
+  proofThumb: { width: 80, height: 80, borderRadius: 10 },
+  removeBtn: { position: 'absolute', top: -8, right: -8 },
   uploadZone: {
     borderWidth: 2, borderColor: BLUE, borderStyle: 'dashed', borderRadius: 14,
-    backgroundColor: '#F0F6FF', paddingVertical: 28,
+    backgroundColor: '#F0F6FF', paddingVertical: 24,
     alignItems: 'center', justifyContent: 'center', gap: 6,
   },
+  uploadZoneError: { borderColor: COLORS.dangerPrimary, backgroundColor: '#FEF2F2' },
   uploadZoneMainText: { fontSize: 14, fontWeight: '600', color: BLUE, marginTop: 4 },
   uploadZoneSubText:  { fontSize: 12, color: COLORS.textMuted },
-  proofSelected: {
-    flexDirection: 'row', alignItems: 'center',
-    backgroundColor: '#fff', borderRadius: 12, padding: 12,
-    borderWidth: 1.5, borderColor: BLUE,
-  },
-  proofThumb:    { width: 52, height: 52, borderRadius: 8, backgroundColor: COLORS.inputBg },
-  proofFileName: { fontSize: 13, fontWeight: '600', color: COLORS.textPrimary },
-  proofFileSize: { fontSize: 12, color: COLORS.textMuted, marginTop: 2 },
-  proofRemove:   { padding: 4 },
   monthMultiplierRow: { flexDirection: 'row', gap: 8, marginVertical: 12 },
   monthBtn: {
     flex: 1, paddingVertical: 10, borderRadius: 8, borderWidth: 1.5,
@@ -397,6 +465,11 @@ const s = StyleSheet.create({
   monthBtnActive:     { backgroundColor: '#4A90D9', borderColor: '#4A90D9' },
   monthBtnText:       { color: '#4A90D9', fontWeight: '700', fontSize: 12 },
   monthBtnTextActive: { color: '#FFFFFF' },
+  partialHint: {
+    backgroundColor: '#FFF8EC', borderRadius: 8, borderWidth: 1, borderColor: '#E07B39',
+    paddingHorizontal: 12, paddingVertical: 8, marginBottom: 4,
+  },
+  partialHintText: { fontSize: 12, color: '#E07B39', fontWeight: '500', lineHeight: 18 },
   advanceHint: {
     backgroundColor: '#EBF4FF', borderRadius: 8, borderWidth: 1, borderColor: '#4A90D9',
     paddingHorizontal: 12, paddingVertical: 8, marginBottom: 4,

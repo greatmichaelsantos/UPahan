@@ -13,7 +13,7 @@ router.get('/current-month', verifyToken, requireRole('tenant'), getCurrentMonth
 router.get('/pending', verifyToken, requireRole('admin'), getPendingDeclarations);
 router.get('/my-declarations', verifyToken, requireRole('tenant'), getTenantDeclarations);
 router.post('/', verifyToken, requireRole('admin'), createPayment);
-router.post('/declare', verifyToken, requireRole('tenant'), paymentProofUpload.single('proofOfPayment'), declarePayment);
+router.post('/declare', verifyToken, requireRole('tenant'), paymentProofUpload.array('proof_images', 5), declarePayment);
 router.put('/:id', verifyToken, requireRole('admin'), updatePayment);
 router.put('/:id/approve', verifyToken, requireRole('admin'), approvePayment);
 router.put('/:id/reject', verifyToken, requireRole('admin'), rejectPayment);

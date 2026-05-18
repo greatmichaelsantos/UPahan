@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Camera, Plus, CheckCircle, ChevronDown, AlertCircle } from 'lucide-react';
+import { Camera, Plus, CheckCircle, ChevronDown, AlertCircle, X } from 'lucide-react';
 import TenantLayout from '../../components/TenantLayout';
 import api from '../../utils/api';
 
@@ -19,19 +19,39 @@ const Label = ({ children }) => (
 
 export default function TenantMaintenanceRequest() {
   const navigate = useNavigate();
-  const [category, setCategory] = useState('');
-  const [subject, setSubject]   = useState('');
+  const [category, setCategory]   = useState('');
+  const [subject, setSubject]     = useState('');
   const [description, setDescription] = useState('');
-  const [photo, setPhoto]       = useState(null);
-  const [preview, setPreview]   = useState(null);
-  const [dropOpen, setDropOpen] = useState(false);
-  const [loading, setLoading]   = useState(false);
-  const [success, setSuccess]   = useState(false);
-  const [error, setError]       = useState('');
+  const [photos, setPhotos]       = useState([]);
+  const [previews, setPreviews]   = useState([]);
+  const [photoError, setPhotoError] = useState('');
+  const [dropOpen, setDropOpen]   = useState(false);
+  const [loading, setLoading]     = useState(false);
+  const [success, setSuccess]     = useState(false);
+  const [error, setError]         = useState('');
+  const fileInputRef = useRef(null);
+
+  const MAX_PHOTOS = 5;
+  const MIN_PHOTOS = 3;
 
   const handlePhoto = (e) => {
-    const file = e.target.files[0];
-    if (file) { setPhoto(file); setPreview(URL.createObjectURL(file)); }
+    const incoming = Array.from(e.target.files || []);
+    if (fileInputRef.current) fileInputRef.current.value = '';
+    if (!incoming.length) return;
+    setPhotoError('');
+    setPhotos(prev => {
+      const combined = [...prev, ...incoming].slice(0, MAX_PHOTOS);
+      setPreviews(combined.map(f => URL.createObjectURL(f)));
+      return combined;
+    });
+  };
+
+  const removePhoto = (idx) => {
+    setPhotos(prev => {
+      const next = prev.filter((_, i) => i !== idx);
+      setPreviews(next.map(f => URL.createObjectURL(f)));
+      return next;
+    });
   };
 
   const handleSubmit = async (e) => {
@@ -39,14 +59,21 @@ export default function TenantMaintenanceRequest() {
     setError('');
     if (!category) { setError('Please select an issue category.'); return; }
     if (!subject.trim()) { setError('Please provide a subject.'); return; }
+    if (photos.length < MIN_PHOTOS) {
+      const msg = photos.length === 0
+        ? 'Please attach at least 3 photos to describe the issue.'
+        : `Please attach at least 3 photos. You have ${photos.length} so far.`;
+      setPhotoError(msg);
+      return;
+    }
     setLoading(true);
     try {
-      const res = await api.post('/maintenance', { issueCategory: category, subject: subject.trim(), description });
-      if (photo) {
-        const fd = new FormData();
-        fd.append('photos', photo);
-        await api.post(`/maintenance/${res.data.data.request_id}/photos`, fd, { headers: { 'Content-Type': 'multipart/form-data' } });
-      }
+      const fd = new FormData();
+      fd.append('issueCategory', category);
+      fd.append('subject', subject.trim());
+      fd.append('description', description);
+      photos.forEach(f => fd.append('maintenance_images', f));
+      await api.post('/maintenance', fd, { headers: { 'Content-Type': 'multipart/form-data' } });
       setSuccess(true);
       setTimeout(() => navigate('/tenant/maintenance'), 1800);
     } catch (err) {
@@ -177,28 +204,56 @@ export default function TenantMaintenanceRequest() {
 
         {/* Photo upload */}
         <div className="card">
-          <Label>Photo Evidence (Optional)</Label>
-          {preview ? (
-            <div style={{ position: 'relative' }}>
-              <img src={preview} alt="Evidence" style={{ width: '100%', aspectRatio: '16/9', objectFit: 'cover', borderRadius: 8 }} />
-              <button
-                type="button"
-                onClick={() => { setPhoto(null); setPreview(null); }}
-                style={{ position: 'absolute', top: 8, right: 8, width: 28, height: 28, borderRadius: '50%', background: 'white', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#D64045', boxShadow: '0 2px 8px rgba(0,0,0,0.12)', fontWeight: 700 }}
-                aria-label="Remove photo"
-              >
-                ×
-              </button>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+            <Label>Photos * (3–5 required)</Label>
+            {photos.length > 0 && (
+              <span style={{ fontFamily: 'Inter', fontSize: 11, fontWeight: 700, color: photos.length >= MIN_PHOTOS ? '#3A7BD5' : '#D64045' }}>
+                {photos.length}/{MAX_PHOTOS}
+              </span>
+            )}
+          </div>
+
+          {previews.length > 0 && (
+            <div style={{ display: 'flex', gap: 8, overflowX: 'auto', marginBottom: 8, paddingBottom: 4 }}>
+              {previews.map((src, idx) => (
+                <div key={idx} style={{ position: 'relative', flexShrink: 0 }}>
+                  <img src={src} alt={`Photo ${idx + 1}`} style={{ width: 88, height: 88, objectFit: 'cover', borderRadius: 8, border: '1px solid #E0DDD8' }} />
+                  <button
+                    type="button"
+                    onClick={() => removePhoto(idx)}
+                    style={{ position: 'absolute', top: -6, right: -6, background: '#D64045', border: 'none', borderRadius: '50%', width: 20, height: 20, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', padding: 0 }}
+                    aria-label={`Remove photo ${idx + 1}`}
+                  >
+                    <X size={12} color="#fff" />
+                  </button>
+                </div>
+              ))}
             </div>
-          ) : (
-            <label style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 10, border: '2px dashed #3A7BD5', borderRadius: 10, padding: '28px 16px', background: '#EBF2FC', cursor: 'pointer' }}>
-              <Camera size={28} color="#3A7BD5" aria-hidden="true" />
+          )}
+
+          {photos.length < MAX_PHOTOS && (
+            <label style={{
+              display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 10,
+              border: `2px dashed ${photoError ? '#D64045' : '#3A7BD5'}`,
+              borderRadius: 10, padding: '20px 16px',
+              background: photoError ? '#FDEEEE' : '#EBF2FC',
+              cursor: 'pointer',
+            }}>
+              <Camera size={28} color={photoError ? '#D64045' : '#3A7BD5'} aria-hidden="true" />
               <div style={{ textAlign: 'center' }}>
-                <p style={{ fontFamily: 'Inter', fontWeight: 600, fontSize: 13, color: '#4A4A4A', marginBottom: 2 }}>Click to take photo or upload</p>
-                <p style={{ fontFamily: 'Inter', fontSize: 12, color: '#888888' }}>JPG, PNG up to 5MB</p>
+                <p style={{ fontFamily: 'Inter', fontWeight: 600, fontSize: 13, color: photoError ? '#D64045' : '#4A4A4A', marginBottom: 2 }}>
+                  {photos.length === 0 ? 'Click to add photos' : 'Add more photos'}
+                </p>
+                <p style={{ fontFamily: 'Inter', fontSize: 12, color: '#888888' }}>Minimum 3 required · JPG, PNG up to 5MB</p>
               </div>
-              <input type="file" accept="image/*" onChange={handlePhoto} className="hidden" />
+              <input ref={fileInputRef} type="file" accept="image/*" multiple onChange={handlePhoto} className="hidden" />
             </label>
+          )}
+
+          {photoError && (
+            <p style={{ fontFamily: 'Inter', fontSize: 12, color: '#D64045', marginTop: 6, display: 'flex', alignItems: 'center', gap: 4 }}>
+              <AlertCircle size={13} /> {photoError}
+            </p>
           )}
         </div>
 

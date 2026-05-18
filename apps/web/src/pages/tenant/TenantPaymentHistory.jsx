@@ -1,10 +1,12 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Download, Info, Receipt, AlertCircle } from 'lucide-react';
+import { Download, Info, Receipt, AlertCircle, Plus } from 'lucide-react';
 import TenantLayout from '../../components/TenantLayout';
 import StatusBadge from '../../components/StatusBadge';
 import EmptyState from '../../components/EmptyState';
+import PaymentDeclarationModal from '../../components/PaymentDeclarationModal';
 import api from '../../utils/api';
+import { useAuth } from '../../context/AuthContext';
 import { formatPeso, formatDate, formatMonthYear } from '../../utils/format';
 
 const STATUS_COLOR = {
@@ -40,11 +42,13 @@ const METHOD_LABEL = { Cash: 'Cash', GCash: 'GCash', Maya: 'Maya', 'Bank Transfe
 export default function TenantPaymentHistory() {
   const navigate  = useNavigate();
   const location  = useLocation();
+  const { tenantInfo } = useAuth();
   const [payments, setPayments]         = useState([]);
   const [declarations, setDeclarations] = useState([]);
   const [summary, setSummary]           = useState({ totalPaid: 0, totalPending: 0 });
   const [loading, setLoading]           = useState(true);
   const [activeTab, setActiveTab]       = useState('history');
+  const [showDeclare, setShowDeclare]   = useState(false);
 
   const load = useCallback((silent = false) => {
     if (!silent) setLoading(true);
@@ -103,12 +107,6 @@ export default function TenantPaymentHistory() {
         </button>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <h1 style={{ fontFamily: 'Inter', fontWeight: 700, fontSize: 26, color: '#4A4A4A' }}>Payments</h1>
-          <button
-            style={{ width: 42, height: 42, borderRadius: 10, background: '#F0EEEB', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
-            aria-label="Download payment history"
-          >
-            <Download size={18} color="#4A4A4A" />
-          </button>
         </div>
       </div>
 
@@ -122,7 +120,7 @@ export default function TenantPaymentHistory() {
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr' }}>
               <div style={{ paddingRight: 16, borderRight: '1px solid #C9A84C' }}>
                 <p style={{ fontFamily: 'Inter', fontWeight: 700, fontSize: 11, color: '#C9A84C', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 6 }}>PAID</p>
-                <p style={{ fontFamily: 'Inter', fontWeight: 700, fontSize: 22, color: '#2E7D72' }}>{formatPeso(summary.totalPaid)}</p>
+                <p style={{ fontFamily: 'Inter', fontWeight: 700, fontSize: 22, color: '#4A90D9' }}>{formatPeso(summary.totalPaid)}</p>
               </div>
               <div style={{ paddingLeft: 16 }}>
                 <p style={{ fontFamily: 'Inter', fontWeight: 700, fontSize: 11, color: '#C9A84C', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 6 }}>PENDING</p>
@@ -131,6 +129,22 @@ export default function TenantPaymentHistory() {
             </div>
           </div>
         )}
+
+        {/* Declare button */}
+        <button
+          onClick={() => setShowDeclare(true)}
+          style={{
+            height: 52, borderRadius: 8, background: '#4A90D9', color: 'white',
+            border: 'none', width: '100%', cursor: 'pointer',
+            fontFamily: 'Inter', fontWeight: 600, fontSize: 14,
+            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+            transition: 'all 150ms ease',
+          }}
+          onMouseOver={e => e.currentTarget.style.background = '#3a7fc1'}
+          onMouseOut={e => e.currentTarget.style.background = '#4A90D9'}
+        >
+          <Plus size={18} aria-hidden="true" /> DECLARE PAYMENT
+        </button>
 
         {/* Color legend */}
         <div className="card" style={{ padding: '10px 14px' }}>
@@ -168,7 +182,7 @@ export default function TenantPaymentHistory() {
         {/* History tab */}
         {activeTab === 'history' && (
           !loading && grouped.length === 0 ? (
-            <EmptyState icon={Receipt} title="No Payments Recorded" message="Your verified payment history will appear here." />
+            <EmptyState icon={Receipt} title="No Payments Recorded" message="Your verified payment history will appear here." iconColor="#4A90D9" iconBg="#EBF4FF" />
           ) : (
             grouped.map(([month, entries]) => (
               <div key={month}>
@@ -195,7 +209,7 @@ export default function TenantPaymentHistory() {
                         <div style={{ padding: '14px 16px' }}>
                           <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 6 }}>
                             <div>
-                              <p style={{ fontFamily: 'Inter', fontWeight: 700, fontSize: 18, color, marginBottom: 2 }}>
+                              <p style={{ fontFamily: 'Inter', fontWeight: 700, fontSize: 18, color: '#4A90D9', marginBottom: 2 }}>
                                 {formatPeso(entry.amount)}
                               </p>
                               <p style={{ fontFamily: 'Inter', fontSize: 12, color: '#888' }}>
@@ -275,16 +289,30 @@ export default function TenantPaymentHistory() {
                         </p>
                       )}
 
-                      {d.proof_of_payment && (
-                        <a
-                          href={d.proof_of_payment}
-                          target="_blank"
-                          rel="noreferrer"
-                          style={{ display: 'inline-block', marginBottom: 10, fontFamily: 'Inter', fontSize: 12, color: '#3A7BD5', fontWeight: 600, textDecoration: 'underline' }}
-                        >
-                          View Proof of Payment
-                        </a>
-                      )}
+                      {(() => {
+                        const proofs = d.proof_images?.length > 0
+                          ? d.proof_images
+                          : d.proof_of_payment ? [d.proof_of_payment] : [];
+                        if (proofs.length === 0) return null;
+                        return (
+                          <div style={{ display: 'flex', gap: 8, overflowX: 'auto', marginBottom: 10, paddingBottom: 4 }}>
+                            {proofs.map((src, idx) =>
+                              src.endsWith('.pdf') ? (
+                                <a key={idx} href={src} target="_blank" rel="noreferrer"
+                                  style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontFamily: 'Inter', fontSize: 12, color: '#3A7BD5', fontWeight: 600, textDecoration: 'underline', flexShrink: 0 }}>
+                                  📄 PDF {proofs.length > 1 ? idx + 1 : ''}
+                                </a>
+                              ) : (
+                                <a key={idx} href={src} target="_blank" rel="noreferrer" style={{ flexShrink: 0 }}>
+                                  <img src={src} alt={`Proof ${idx + 1}`}
+                                    style={{ width: 72, height: 72, objectFit: 'cover', borderRadius: 8, border: '1px solid #E0DDD8', cursor: 'pointer' }}
+                                  />
+                                </a>
+                              )
+                            )}
+                          </div>
+                        );
+                      })()}
 
                       {status === 'rejected' && d.rejection_reason && (
                         <div style={{ background: '#FEF2F2', border: '1px solid #D64045', borderRadius: 8, padding: '10px 12px', display: 'flex', alignItems: 'flex-start', gap: 8 }}>
@@ -320,6 +348,15 @@ export default function TenantPaymentHistory() {
       </div>
 
     </div>
+      {showDeclare && (
+        <PaymentDeclarationModal
+          unit={tenantInfo?.unit_code}
+          monthlyRent={tenantInfo?.monthly_price}
+          onClose={() => setShowDeclare(false)}
+          onSuccess={() => { setShowDeclare(false); load(false); }}
+          initialType="full"
+        />
+      )}
     </TenantLayout>
   );
 }

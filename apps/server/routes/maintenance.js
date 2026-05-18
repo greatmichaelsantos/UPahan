@@ -6,7 +6,7 @@ const { maintenancePhotoUpload } = require('../middleware/upload');
 
 router.get('/', verifyToken, getRequests);
 router.get('/:id', verifyToken, getRequest);
-router.post('/', verifyToken, requireRole('tenant'), createRequest);
+router.post('/', verifyToken, requireRole('tenant'), maintenancePhotoUpload.array('maintenance_images', 5), createRequest);
 router.put('/:id', verifyToken, requireRole('admin'), updateRequest);
 router.post('/:id/photos', verifyToken, requireRole('tenant'), maintenancePhotoUpload.array('photos', 5), uploadRequestPhotos);
 

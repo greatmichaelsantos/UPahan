@@ -8,6 +8,7 @@ const getRequests = async (req, res) => {
     let query, params = [];
 
     if (req.user.role === 'admin') {
+      params.push(req.user.userId);
       query = `
         SELECT mr.*, u.first_name || ' ' || u.last_name AS tenant_name,
                un.unit_code,
@@ -17,7 +18,7 @@ const getRequests = async (req, res) => {
         JOIN users u ON t.user_id = u.user_id
         JOIN units un ON mr.unit_id = un.unit_id
         LEFT JOIN media m ON m.maintenance_request_id = mr.request_id
-        WHERE 1=1
+        WHERE un.admin_id = $1
       `;
     } else {
       const tenantResult = await pool.query(
@@ -49,7 +50,13 @@ const getRequests = async (req, res) => {
     query += ' ORDER BY mr.report_date DESC';
 
     const result = await pool.query(query, params);
-    res.json({ success: true, data: result.rows });
+    const data = result.rows.map(row => ({
+      ...row,
+      photos: row.maintenance_images
+        ? JSON.parse(row.maintenance_images)
+        : (row.photos || []).filter(Boolean),
+    }));
+    res.json({ success: true, data });
   } catch (err) {
     console.error('Get requests error:', err);
     res.status(500).json({ success: false, message: 'Server error.' });
@@ -76,7 +83,11 @@ const getRequest = async (req, res) => {
     if (result.rows.length === 0) {
       return res.status(404).json({ success: false, message: 'Request not found.' });
     }
-    res.json({ success: true, data: result.rows[0] });
+    const row = result.rows[0];
+    const photos = row.maintenance_images
+      ? JSON.parse(row.maintenance_images)
+      : (row.photos || []).filter(Boolean);
+    res.json({ success: true, data: { ...row, photos } });
   } catch (err) {
     console.error('Get request error:', err);
     res.status(500).json({ success: false, message: 'Server error.' });
@@ -88,6 +99,14 @@ const createRequest = async (req, res) => {
   if (!issueCategory || !subject) {
     return res.status(400).json({ success: false, message: 'Category and subject are required.' });
   }
+  const fileCount = req.files?.length || 0;
+  if (fileCount < 3) {
+    const msg = fileCount === 0
+      ? 'Please attach at least 3 photos to describe the issue.'
+      : `Please attach at least 3 photos. You have ${fileCount} so far.`;
+    return res.status(400).json({ success: false, message: msg });
+  }
+  const maintenanceImages = JSON.stringify(req.files.map(f => `/uploads/maintenance/${path.basename(f.path)}`));
   try {
     const tenantResult = await pool.query(
       `SELECT t.tenant_id, t.unit_id, u.first_name || ' ' || u.last_name AS tenant_name, un.unit_code
@@ -102,9 +121,9 @@ const createRequest = async (req, res) => {
     }
     const { tenant_id, unit_id, tenant_name, unit_code } = tenantResult.rows[0];
     const result = await pool.query(
-      `INSERT INTO maintenance_requests (tenant_id, unit_id, issue_category, subject, description, priority_level)
-       VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`,
-      [tenant_id, unit_id, issueCategory, subject, description || null, priorityLevel || 'low']
+      `INSERT INTO maintenance_requests (tenant_id, unit_id, issue_category, subject, description, priority_level, maintenance_images)
+       VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *`,
+      [tenant_id, unit_id, issueCategory, subject, description || null, priorityLevel || 'low', maintenanceImages]
     );
 
     // Notify admin (non-blocking)
@@ -127,6 +146,16 @@ const updateRequest = async (req, res) => {
   const { id } = req.params;
   const { status, priorityLevel } = req.body;
   try {
+    const ownerCheck = await pool.query(
+      `SELECT mr.request_id FROM maintenance_requests mr
+       JOIN units un ON mr.unit_id = un.unit_id
+       WHERE mr.request_id = $1 AND un.admin_id = $2`,
+      [id, req.user.userId]
+    );
+    if (ownerCheck.rows.length === 0) {
+      return res.status(404).json({ success: false, message: 'Request not found or access denied.' });
+    }
+
     const result = await pool.query(
       `UPDATE maintenance_requests SET
          status = COALESCE($1, status),

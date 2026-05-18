@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { X, Upload, AlertCircle } from 'lucide-react';
 import api from '../utils/api';
 import { formatPeso } from '../utils/format';
@@ -50,11 +50,13 @@ export default function PaymentDeclarationModal({ unit, monthlyRent, onClose, on
     notes: '',
   });
   const [amountWarning, setAmountWarning] = useState('');
-  const [proofFile, setProofFile]   = useState(null);
-  const [proofPreview, setProofPreview] = useState(null);
-  const [submitting, setSubmitting] = useState(false);
-  const [error, setError]           = useState('');
-  const [success, setSuccess]       = useState('');
+  const [proofFiles, setProofFiles]     = useState([]);
+  const [proofPreviews, setProofPreviews] = useState([]);
+  const [proofError, setProofError]     = useState('');
+  const [submitting, setSubmitting]     = useState(false);
+  const [error, setError]               = useState('');
+  const [success, setSuccess]           = useState('');
+  const fileInputRef = useRef(null);
 
   const handleTypeChange = (type) => {
     setPaymentType(type);
@@ -106,26 +108,31 @@ export default function PaymentDeclarationModal({ unit, monthlyRent, onClose, on
     }
   };
 
-  const handleFile = (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
+  const MAX_PROOF = 5;
 
-    if (file.size > 5 * 1024 * 1024) {
-      setError('File size must not exceed 5MB.');
-      return;
-    }
-    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'application/pdf'];
-    if (!allowedTypes.includes(file.type)) {
-      setError('Only JPG, PNG, and PDF files are accepted.');
-      return;
+  const handleFile = (e) => {
+    const incoming = Array.from(e.target.files || []);
+    if (fileInputRef.current) fileInputRef.current.value = '';
+    const allowed = ['image/jpeg', 'image/jpg', 'image/png', 'application/pdf'];
+    for (const file of incoming) {
+      if (file.size > 5 * 1024 * 1024) { setError('File size must not exceed 5MB.'); return; }
+      if (!allowed.includes(file.type)) { setError('Only JPG, PNG, and PDF files are accepted.'); return; }
     }
     setError('');
-    setProofFile(file);
-    if (file.type !== 'application/pdf') {
-      setProofPreview(URL.createObjectURL(file));
-    } else {
-      setProofPreview('pdf');
-    }
+    setProofError('');
+    setProofFiles(prev => {
+      const combined = [...prev, ...incoming].slice(0, MAX_PROOF);
+      setProofPreviews(combined.map(f => f.type === 'application/pdf' ? 'pdf' : URL.createObjectURL(f)));
+      return combined;
+    });
+  };
+
+  const removeProofFile = (idx) => {
+    setProofFiles(prev => {
+      const next = prev.filter((_, i) => i !== idx);
+      setProofPreviews(next.map(f => f.type === 'application/pdf' ? 'pdf' : URL.createObjectURL(f)));
+      return next;
+    });
   };
 
   const handleSubmit = async (e) => {
@@ -137,8 +144,10 @@ export default function PaymentDeclarationModal({ unit, monthlyRent, onClose, on
     if (paymentType === 'partial' && parseFloat(form.amountPaid) >= parseFloat(monthlyRent)) {
       setError(`Partial payment must be less than the full rent of ${formatPeso(monthlyRent)}.`); return;
     }
-    if (!form.paymentDate) { setError('Please select a payment date.'); return; }
-    if (form.paymentDate > today) { setError('Payment date cannot be in the future.'); return; }
+    if (proofFiles.length === 0) {
+      setProofError('Please attach at least one proof of payment.');
+      return;
+    }
 
     setSubmitting(true);
     try {
@@ -146,11 +155,15 @@ export default function PaymentDeclarationModal({ unit, monthlyRent, onClose, on
       fd.append('paymentMethod', form.paymentMethod);
       fd.append('amountPaid', form.amountPaid);
       fd.append('referenceNumber', form.referenceNumber);
-      fd.append('paymentDate', form.paymentDate);
+      fd.append('paymentDate', today);
       fd.append('notes', form.notes);
       fd.append('paymentType', paymentType);
       if (paymentType === 'advance') fd.append('monthCovered', getAdvanceMonthCovered(advanceMonths));
-      if (proofFile) fd.append('proofOfPayment', proofFile);
+      else {
+        const now = new Date();
+        fd.append('monthCovered', `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`);
+      }
+      proofFiles.forEach(f => fd.append('proof_images', f));
 
       await api.post('/payments/declare', fd, { headers: { 'Content-Type': 'multipart/form-data' } });
       setSuccess('Your payment declaration has been submitted. Please wait for the landlord to approve it.');
@@ -184,14 +197,14 @@ export default function PaymentDeclarationModal({ unit, monthlyRent, onClose, on
         <form onSubmit={handleSubmit} style={{ padding: 20, display: 'flex', flexDirection: 'column', gap: 14 }}>
 
           {/* Unit summary */}
-          <div style={{ background: '#EBF2FC', borderRadius: 10, padding: '10px 14px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div style={{ background: '#4A90D9', borderRadius: 10, padding: '10px 14px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <div>
-              <p style={{ fontFamily: 'Inter', fontSize: 12, color: '#888888', marginBottom: 2 }}>Unit</p>
-              <p style={{ fontFamily: 'Inter', fontWeight: 700, fontSize: 15, color: '#3A7BD5' }}>{unit}</p>
+              <p style={{ fontFamily: 'Inter', fontSize: 12, color: 'rgba(255,255,255,0.7)', marginBottom: 2 }}>Unit</p>
+              <p style={{ fontFamily: 'Inter', fontWeight: 700, fontSize: 15, color: '#ffffff' }}>{unit}</p>
             </div>
             <div style={{ textAlign: 'right' }}>
-              <p style={{ fontFamily: 'Inter', fontSize: 12, color: '#888888', marginBottom: 2 }}>Monthly Rent</p>
-              <p style={{ fontFamily: 'Inter', fontWeight: 700, fontSize: 15, color: '#3A7BD5' }}>{formatPeso(monthlyRent)}</p>
+              <p style={{ fontFamily: 'Inter', fontSize: 12, color: 'rgba(255,255,255,0.7)', marginBottom: 2 }}>Monthly Rent</p>
+              <p style={{ fontFamily: 'Inter', fontWeight: 700, fontSize: 15, color: '#ffffff' }}>{formatPeso(monthlyRent)}</p>
             </div>
           </div>
 
@@ -283,23 +296,15 @@ export default function PaymentDeclarationModal({ unit, monthlyRent, onClose, on
             </select>
           </div>
 
-          {/* Amount + Date */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
-            <div>
-              <label style={labelStyle}>Amount Paid *</label>
-              <div style={{ position: 'relative' }}>
-                <span style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', fontFamily: 'Inter', fontWeight: 700, color: '#3A7BD5', fontSize: 15 }}>₱</span>
-                <input type="number" value={form.amountPaid} onChange={set('amountPaid')} min="1"
-                  style={{ ...baseInput, paddingLeft: 26 }} onFocus={onFocus} onBlur={onBlur} />
-              </div>
-              {amountWarning && (
-                <p style={{ fontFamily: 'Inter', fontSize: 11, color: '#E07B39', marginTop: 4 }}>{amountWarning}</p>
-              )}
-            </div>
-            <div>
-              <label style={labelStyle}>Payment Date *</label>
-              <input type="date" value={form.paymentDate} onChange={set('paymentDate')} max={today}
-                style={baseInput} onFocus={onFocus} onBlur={onBlur} />
+          {/* Amount */}
+          <div>
+            <label style={labelStyle}>Amount Paid *</label>
+            <div style={{ position: 'relative' }}>
+              <span style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', fontFamily: 'Inter', fontWeight: 700, color: '#3A7BD5', fontSize: 15 }}>₱</span>
+              <input type="number" value={form.amountPaid} onChange={set('amountPaid')} min="1"
+                readOnly={paymentType === 'full'}
+                style={{ ...baseInput, paddingLeft: 26, ...(paymentType === 'full' ? { background: '#F5F5F5', cursor: 'not-allowed', opacity: 0.8 } : {}) }}
+                onFocus={onFocus} onBlur={onBlur} />
             </div>
           </div>
 
@@ -313,25 +318,56 @@ export default function PaymentDeclarationModal({ unit, monthlyRent, onClose, on
 
           {/* Proof of Payment */}
           <div>
-            <label style={labelStyle}>Proof of Payment</label>
-            <label style={{
-              display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 8,
-              border: '2px dashed #3A7BD5', borderRadius: 10, padding: '14px', background: '#EBF2FC', cursor: 'pointer',
-            }}>
-              <Upload size={20} color="#3A7BD5" aria-hidden="true" />
-              <span style={{ fontFamily: 'Inter', fontSize: 13, color: '#4A4A4A', textAlign: 'center' }}>
-                Upload screenshot or receipt (optional)
-              </span>
-              <span style={{ fontFamily: 'Inter', fontSize: 11, color: '#888888' }}>JPG, PNG, PDF up to 5MB</span>
-              <input type="file" accept=".jpg,.jpeg,.png,.pdf" onChange={handleFile} style={{ display: 'none' }} />
-            </label>
-            {proofPreview === 'pdf' && (
-              <div style={{ marginTop: 8, padding: '10px 14px', background: '#EBF2FC', borderRadius: 8, fontFamily: 'Inter', fontSize: 13, color: '#3A7BD5', fontWeight: 600 }}>
-                ✓ PDF file selected: {proofFile?.name}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+              <label style={{ ...labelStyle, marginBottom: 0 }}>Proof of Payment *</label>
+              {proofFiles.length > 0 && (
+                <span style={{ fontFamily: 'Inter', fontSize: 11, fontWeight: 700, color: '#3A7BD5' }}>
+                  {proofFiles.length}/{MAX_PROOF}
+                </span>
+              )}
+            </div>
+            {proofFiles.length > 0 && (
+              <div style={{ display: 'flex', gap: 8, overflowX: 'auto', marginBottom: 8, paddingBottom: 4 }}>
+                {proofPreviews.map((preview, idx) => (
+                  <div key={idx} style={{ position: 'relative', flexShrink: 0 }}>
+                    {preview === 'pdf' ? (
+                      <div style={{ width: 80, height: 80, borderRadius: 8, background: '#EBF2FC', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', border: '1px solid #3A7BD5', fontSize: 10, color: '#3A7BD5', fontFamily: 'Inter', fontWeight: 600, gap: 2 }}>
+                        <span style={{ fontSize: 20 }}>📄</span>
+                        PDF
+                      </div>
+                    ) : (
+                      <img src={preview} alt={`Proof ${idx + 1}`} style={{ width: 80, height: 80, objectFit: 'cover', borderRadius: 8, border: '1px solid #E0DDD8' }} />
+                    )}
+                    <button
+                      type="button"
+                      onClick={() => removeProofFile(idx)}
+                      style={{ position: 'absolute', top: -6, right: -6, background: '#D64045', border: 'none', borderRadius: '50%', width: 20, height: 20, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', padding: 0 }}
+                      aria-label={`Remove proof ${idx + 1}`}
+                    >
+                      <X size={12} color="#fff" />
+                    </button>
+                  </div>
+                ))}
               </div>
             )}
-            {proofPreview && proofPreview !== 'pdf' && (
-              <img src={proofPreview} alt="Proof preview" style={{ width: '100%', maxHeight: 160, objectFit: 'cover', borderRadius: 8, marginTop: 8 }} />
+            {proofFiles.length < MAX_PROOF && (
+              <label style={{
+                display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 8,
+                border: `2px dashed ${proofError ? '#D64045' : '#3A7BD5'}`,
+                borderRadius: 10, padding: '14px',
+                background: proofError ? '#FDEEEE' : '#EBF2FC',
+                cursor: 'pointer',
+              }}>
+                <Upload size={20} color={proofError ? '#D64045' : '#3A7BD5'} aria-hidden="true" />
+                <span style={{ fontFamily: 'Inter', fontSize: 13, color: proofError ? '#D64045' : '#4A4A4A', textAlign: 'center' }}>
+                  {proofFiles.length === 0 ? 'Upload proof of payment' : 'Add more photos'}
+                </span>
+                <span style={{ fontFamily: 'Inter', fontSize: 11, color: '#888888' }}>JPG, PNG, PDF up to 5MB each</span>
+                <input ref={fileInputRef} type="file" accept=".jpg,.jpeg,.png,.pdf" multiple onChange={handleFile} style={{ display: 'none' }} />
+              </label>
+            )}
+            {proofError && (
+              <p style={{ fontFamily: 'Inter', fontSize: 12, color: '#D64045', marginTop: 4 }}>{proofError}</p>
             )}
           </div>
 

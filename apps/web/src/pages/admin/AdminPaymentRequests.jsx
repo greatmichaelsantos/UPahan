@@ -150,26 +150,35 @@ export default function AdminPaymentRequests() {
                 </div>
 
                 {/* Proof of payment */}
-                {d.proof_of_payment && (
-                  <div style={{ marginBottom: 12 }}>
-                    <p style={{ fontFamily: 'Inter', fontSize: 10, color: '#888888', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 6 }}>PROOF OF PAYMENT</p>
-                    {d.proof_of_payment.endsWith('.pdf') ? (
-                      <a
-                        href={d.proof_of_payment} target="_blank" rel="noreferrer"
-                        style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontFamily: 'Inter', fontWeight: 600, fontSize: 13, color: '#3A7BD5', textDecoration: 'none' }}
-                      >
-                        <ExternalLink size={14} /> Open PDF Receipt
-                      </a>
-                    ) : (
-                      <a href={d.proof_of_payment} target="_blank" rel="noreferrer">
-                        <img
-                          src={d.proof_of_payment} alt="Proof of payment"
-                          style={{ width: '100%', maxHeight: 160, objectFit: 'cover', borderRadius: 8, cursor: 'pointer' }}
-                        />
-                      </a>
-                    )}
-                  </div>
-                )}
+                {(() => {
+                  const proofs = d.proof_images?.length > 0
+                    ? d.proof_images
+                    : d.proof_of_payment ? [d.proof_of_payment] : [];
+                  if (proofs.length === 0) return null;
+                  return (
+                    <div style={{ marginBottom: 12 }}>
+                      <p style={{ fontFamily: 'Inter', fontSize: 10, color: '#888888', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 6 }}>
+                        PROOF OF PAYMENT {proofs.length > 1 ? `(${proofs.length})` : ''}
+                      </p>
+                      <div style={{ display: 'flex', gap: 8, overflowX: 'auto', paddingBottom: 4 }}>
+                        {proofs.map((src, idx) =>
+                          src.endsWith('.pdf') ? (
+                            <a key={idx} href={src} target="_blank" rel="noreferrer"
+                              style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontFamily: 'Inter', fontWeight: 600, fontSize: 13, color: '#3A7BD5', textDecoration: 'none', flexShrink: 0 }}>
+                              <ExternalLink size={14} /> PDF {proofs.length > 1 ? idx + 1 : 'Receipt'}
+                            </a>
+                          ) : (
+                            <a key={idx} href={src} target="_blank" rel="noreferrer" style={{ flexShrink: 0 }}>
+                              <img src={src} alt={`Proof ${idx + 1}`}
+                                style={{ width: 100, height: 100, objectFit: 'cover', borderRadius: 8, cursor: 'pointer', border: '1px solid #E0DDD8' }}
+                              />
+                            </a>
+                          )
+                        )}
+                      </div>
+                    </div>
+                  );
+                })()}
 
                 {/* Notes */}
                 {d.notes && (

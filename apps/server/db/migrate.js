@@ -107,6 +107,28 @@ async function migrate() {
     await pool.query(`ALTER TABLE payments ALTER COLUMN month_covered TYPE VARCHAR(50)`);
     console.log('✓ payments.month_covered widened to VARCHAR(50)');
 
+    // Date of birth on users
+    await pool.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS date_of_birth DATE`);
+    console.log('✓ users.date_of_birth');
+
+    // Email verification
+    await pool.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS is_verified BOOLEAN DEFAULT FALSE`);
+    await pool.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS verification_token VARCHAR(255)`);
+    console.log('✓ users.is_verified, users.verification_token');
+
+    // Password reset
+    await pool.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS reset_token VARCHAR(255)`);
+    await pool.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS reset_token_expires TIMESTAMPTZ`);
+    console.log('✓ users.reset_token, users.reset_token_expires');
+
+    // Multi-image proof for payments
+    await pool.query(`ALTER TABLE payments ADD COLUMN IF NOT EXISTS proof_images TEXT`);
+    console.log('✓ payments.proof_images');
+
+    // Inline maintenance photos
+    await pool.query(`ALTER TABLE maintenance_requests ADD COLUMN IF NOT EXISTS maintenance_images TEXT`);
+    console.log('✓ maintenance_requests.maintenance_images');
+
     console.log('\nMigration completed successfully!');
     process.exit(0);
   } catch (err) {

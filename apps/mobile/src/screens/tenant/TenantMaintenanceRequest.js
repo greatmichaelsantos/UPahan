@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import {
   View, Text, TextInput, TouchableOpacity, StyleSheet,
   ScrollView, ActivityIndicator, Alert, Image, StatusBar
@@ -19,44 +19,68 @@ const PRIORITIES = [
   { value: 'high',   label: 'High',   color: COLORS.dangerPrimary },
 ];
 
+const MAX_PHOTOS = 5;
+const MIN_PHOTOS = 3;
+
 export default function TenantMaintenanceRequest({ navigation }) {
-  const [category, setCategory] = useState('');
-  const [subject, setSubject]   = useState('');
-  const [description, setDesc]  = useState('');
-  const [priority, setPriority] = useState('low');
-  const [photos, setPhotos]     = useState([]);
-  const [loading, setLoading]   = useState(false);
+  const [category, setCategory]     = useState('');
+  const [subject, setSubject]       = useState('');
+  const [description, setDesc]      = useState('');
+  const [priority, setPriority]     = useState('low');
+  const [photos, setPhotos]         = useState([]);
+  const [loading, setLoading]       = useState(false);
+  const [photoError, setPhotoError] = useState('');
 
   const pickPhoto = async () => {
+    if (photos.length >= MAX_PHOTOS) {
+      return Alert.alert('Limit Reached', `You can only attach up to ${MAX_PHOTOS} photos.`);
+    }
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (status !== 'granted') {
+      return Alert.alert('Permission Required', 'Please allow access to your photo library.');
+    }
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsMultipleSelection: true,
       quality: 0.7,
     });
-    if (!result.canceled) setPhotos(prev => [...prev, ...result.assets]);
+    if (!result.canceled) {
+      setPhotos(prev => [...prev, ...result.assets].slice(0, MAX_PHOTOS));
+      setPhotoError('');
+    }
   };
+
+  const removePhoto = (index) => setPhotos(ps => ps.filter((_, j) => j !== index));
 
   const handleSubmit = async () => {
     if (!category) return Alert.alert('Required', 'Please select an issue category.');
     if (!subject.trim()) return Alert.alert('Required', 'Please enter a subject.');
+    if (photos.length < MIN_PHOTOS) {
+      const msg = photos.length === 0
+        ? 'Please attach at least 3 photos to describe the issue.'
+        : `Please attach at least 3 photos. You have ${photos.length} so far.`;
+      setPhotoError(msg);
+      return;
+    }
     setLoading(true);
     try {
-      const res = await api.post(API_ROUTES.MAINTENANCE, {
-        issueCategory: category,
-        subject:       subject.trim(),
-        description:   description.trim(),
-        priorityLevel: priority,
+      const fd = new FormData();
+      fd.append('issueCategory', category);
+      fd.append('subject', subject.trim());
+      fd.append('description', description.trim());
+      fd.append('priorityLevel', priority);
+      photos.forEach((p, i) => {
+        const uriParts = p.uri.split('.');
+        const ext = uriParts[uriParts.length - 1] || 'jpg';
+        fd.append('maintenance_images', {
+          uri:  p.uri,
+          type: `image/${ext === 'jpg' ? 'jpeg' : ext}`,
+          name: p.fileName || `photo_${i}.${ext}`,
+        });
       });
-      if (photos.length > 0) {
-        const requestId = res.data.data?.request_id;
-        if (requestId) {
-          const fd = new FormData();
-          photos.forEach(p => fd.append('photos', { uri: p.uri, type: 'image/jpeg', name: 'photo.jpg' }));
-          await api.post(API_ROUTES.maintenancePhotos(requestId), fd, {
-            headers: { 'Content-Type': 'multipart/form-data' },
-          });
-        }
-      }
+      await api.post(API_ROUTES.MAINTENANCE, fd, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
       Alert.alert('Submitted!', 'Your maintenance request has been submitted.', [
         { text: 'OK', onPress: () => navigation.goBack() },
       ]);
@@ -140,32 +164,43 @@ export default function TenantMaintenanceRequest({ navigation }) {
           textAlignVertical="top"
         />
 
-        <Text style={s.fieldLabel}>PHOTOS <Text style={s.optional}>(optional)</Text></Text>
-        <TouchableOpacity style={s.uploadZone} onPress={pickPhoto}>
-          <View style={s.uploadIconWrap}>
-            <Ionicons name="camera-outline" size={28} color={BLUE} />
-          </View>
-          <Text style={s.uploadLabel}>Tap to add photos</Text>
+        <View style={s.photoHeaderRow}>
+          <Text style={[s.fieldLabel, { marginTop: 0, marginBottom: 0 }]}>PHOTOS * (3–5 required)</Text>
           {photos.length > 0 && (
-            <Text style={s.uploadSub}>{photos.length} photo{photos.length > 1 ? 's' : ''} selected</Text>
+            <Text style={[s.photoCounter, photos.length >= MIN_PHOTOS ? { color: BLUE } : { color: COLORS.dangerPrimary }]}>
+              {photos.length}/{MAX_PHOTOS}
+            </Text>
           )}
-        </TouchableOpacity>
+        </View>
 
         {photos.length > 0 && (
-          <View style={s.photoRow}>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={s.thumbRow}>
             {photos.map((p, i) => (
-              <View key={i} style={s.photoThumb}>
+              <View key={i} style={s.thumbWrap}>
                 <Image source={{ uri: p.uri }} style={s.thumbImg} />
-                <TouchableOpacity
-                  style={s.removePhoto}
-                  onPress={() => setPhotos(ps => ps.filter((_, j) => j !== i))}
-                >
+                <TouchableOpacity style={s.removeBtn} onPress={() => removePhoto(i)}>
                   <Ionicons name="close-circle" size={22} color={COLORS.dangerPrimary} />
                 </TouchableOpacity>
               </View>
             ))}
-          </View>
+          </ScrollView>
         )}
+
+        {photos.length < MAX_PHOTOS && (
+          <TouchableOpacity
+            style={[s.uploadZone, photoError ? s.uploadZoneError : null]}
+            onPress={pickPhoto}
+          >
+            <View style={s.uploadIconWrap}>
+              <Ionicons name="camera-outline" size={28} color={photoError ? COLORS.dangerPrimary : BLUE} />
+            </View>
+            <Text style={[s.uploadLabel, photoError ? { color: COLORS.dangerPrimary } : null]}>
+              Tap to add photos
+            </Text>
+            <Text style={s.uploadSub}>Minimum 3 photos required</Text>
+          </TouchableOpacity>
+        )}
+        {!!photoError && <Text style={s.photoErrorText}>{photoError}</Text>}
 
         <TouchableOpacity
           style={[s.submitBtn, loading && { opacity: 0.65 }]}
@@ -189,7 +224,7 @@ const s = StyleSheet.create({
   },
   backBtn:   { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 8 },
   backText:  { fontSize: 13, color: BLUE, fontWeight: '500' },
-  pageTitle: { fontSize: 26, fontWeight: '700', fontFamily: 'serif', color: COLORS.textPrimary },
+  pageTitle: { fontSize: 26, fontWeight: '700', fontFamily: 'Inter_700Bold', color: COLORS.textPrimary },
   scroll:    { padding: 20, paddingBottom: 48 },
   fieldLabel: {
     fontSize: 11, fontWeight: '700', color: GOLD,
@@ -218,21 +253,25 @@ const s = StyleSheet.create({
     paddingHorizontal: 14, paddingTop: 14, fontSize: 14, color: COLORS.textPrimary,
     textAlignVertical: 'top', borderWidth: 1, borderColor: COLORS.inputBorder,
   },
+  photoHeaderRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8, marginTop: 16 },
+  photoCounter:   { fontSize: 13, fontWeight: '700' },
+  thumbRow:       { flexDirection: 'row', marginBottom: 12 },
+  thumbWrap:      { position: 'relative', marginRight: 10 },
+  removeBtn:      { position: 'absolute', top: -8, right: -8 },
   uploadZone: {
     borderWidth: 1.5, borderColor: BLUE, borderStyle: 'dashed',
     borderRadius: 16, backgroundColor: COLORS.tenantLight,
-    padding: 24, alignItems: 'center', gap: 8, marginBottom: 12,
+    padding: 24, alignItems: 'center', gap: 8, marginBottom: 4,
   },
+  uploadZoneError: { borderColor: COLORS.dangerPrimary, backgroundColor: '#FFF5F5' },
   uploadIconWrap: {
     width: 52, height: 52, borderRadius: 26,
     backgroundColor: '#fff', alignItems: 'center', justifyContent: 'center',
   },
-  uploadLabel: { fontSize: 14, fontWeight: '700', color: BLUE },
-  uploadSub:   { fontSize: 12, color: BLUE },
-  photoRow:    { flexDirection: 'row', flexWrap: 'wrap', gap: 10, marginBottom: 20 },
-  photoThumb:  { position: 'relative' },
-  thumbImg:    { width: 76, height: 76, borderRadius: 10 },
-  removePhoto: { position: 'absolute', top: -8, right: -8 },
+  uploadLabel:    { fontSize: 14, fontWeight: '700', color: BLUE },
+  uploadSub:      { fontSize: 12, color: COLORS.textMuted },
+  photoErrorText: { fontSize: 12, color: COLORS.dangerPrimary, marginBottom: 12, marginTop: 2 },
+  thumbImg:       { width: 76, height: 76, borderRadius: 10 },
   submitBtn: {
     backgroundColor: BLUE, height: 52, borderRadius: 999,
     alignItems: 'center', justifyContent: 'center', marginTop: 8,

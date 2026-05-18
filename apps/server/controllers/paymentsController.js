@@ -8,6 +8,7 @@ const getPayments = async (req, res) => {
     let query, params = [];
 
     if (req.user.role === 'admin') {
+      params.push(req.user.userId);
       query = `
         SELECT p.*, u.first_name || ' ' || u.last_name AS tenant_name,
                un.unit_code, un.monthly_price
@@ -15,7 +16,7 @@ const getPayments = async (req, res) => {
         JOIN tenants t ON p.tenant_id = t.tenant_id
         JOIN users u ON t.user_id = u.user_id
         JOIN units un ON p.unit_id = un.unit_id
-        WHERE 1=1
+        WHERE un.admin_id = $1
       `;
       if (month) { query += ` AND p.month_covered = $${params.length + 1}`; params.push(month); }
       if (tenantId) { query += ` AND p.tenant_id = $${params.length + 1}`; params.push(tenantId); }
@@ -225,17 +226,17 @@ const declarePayment = async (req, res) => {
       }
     }
 
-    let proofPath = null;
-    if (req.file) {
-      proofPath = `/uploads/payments/${path.basename(req.file.path)}`;
+    if (!req.files || req.files.length === 0) {
+      return res.status(400).json({ success: false, message: 'Please attach at least one proof of payment.' });
     }
+    const proofImages = JSON.stringify(req.files.map(f => `/uploads/payments/${path.basename(f.path)}`));
 
     const result = await pool.query(
       `INSERT INTO payments (tenant_id, unit_id, amount, payment_date, payment_status, month_covered,
-         payment_method, reference_number, proof_of_payment, notes, declared_by_tenant, verified_by_admin, payment_type)
+         payment_method, reference_number, proof_images, notes, declared_by_tenant, verified_by_admin, payment_type)
        VALUES ($1, $2, $3, $4, 'pending_approval', $5, $6, $7, $8, $9, true, false, $10) RETURNING *`,
       [tenant_id, unit_id, parseFloat(amountPaid), paymentDate, monthCovered,
-       paymentMethod, referenceNumber || null, proofPath, notes || null, pType]
+       paymentMethod, referenceNumber || null, proofImages, notes || null, pType]
     );
 
     // Notify admin (non-blocking)
@@ -269,9 +270,14 @@ const getPendingDeclarations = async (req, res) => {
       JOIN users u ON t.user_id = u.user_id
       JOIN units un ON p.unit_id = un.unit_id
       WHERE p.payment_status = 'pending_approval' AND p.declared_by_tenant = true
+        AND un.admin_id = $1
       ORDER BY p.created_at DESC
-    `);
-    res.json({ success: true, data: result.rows });
+    `, [req.user.userId]);
+    const data = result.rows.map(row => ({
+      ...row,
+      proof_images: row.proof_images ? JSON.parse(row.proof_images) : [],
+    }));
+    res.json({ success: true, data });
   } catch (err) {
     console.error('Get pending declarations error:', err);
     res.status(500).json({ success: false, message: 'Server error.' });
@@ -297,7 +303,11 @@ const getTenantDeclarations = async (req, res) => {
        ORDER BY p.created_at DESC`,
       [myTenantId]
     );
-    res.json({ success: true, data: result.rows });
+    const data = result.rows.map(row => ({
+      ...row,
+      proof_images: row.proof_images ? JSON.parse(row.proof_images) : [],
+    }));
+    res.json({ success: true, data });
   } catch (err) {
     console.error('Get tenant declarations error:', err);
     res.status(500).json({ success: false, message: 'Server error.' });
@@ -314,11 +324,11 @@ const approvePayment = async (req, res) => {
        JOIN units un ON p.unit_id = un.unit_id
        JOIN tenants t ON p.tenant_id = t.tenant_id
        JOIN users u ON t.user_id = u.user_id
-       WHERE p.payment_id = $1`,
-      [id]
+       WHERE p.payment_id = $1 AND un.admin_id = $2`,
+      [id, req.user.userId]
     );
     if (payResult.rows.length === 0) {
-      return res.status(404).json({ success: false, message: 'Payment not found.' });
+      return res.status(404).json({ success: false, message: 'Payment not found or access denied.' });
     }
     const payment = payResult.rows[0];
 
@@ -364,15 +374,19 @@ const rejectPayment = async (req, res) => {
     return res.status(400).json({ success: false, message: 'Rejection reason is required.' });
   }
   try {
-    // Get tenant user_id before updating
+    // Verify ownership and get tenant info for notification
     const payResult = await pool.query(
       `SELECT p.month_covered, p.amount, u.user_id AS tenant_user_id
        FROM payments p
        JOIN tenants t ON p.tenant_id = t.tenant_id
        JOIN users u ON t.user_id = u.user_id
-       WHERE p.payment_id = $1`,
-      [id]
+       JOIN units un ON p.unit_id = un.unit_id
+       WHERE p.payment_id = $1 AND un.admin_id = $2`,
+      [id, req.user.userId]
     );
+    if (payResult.rows.length === 0) {
+      return res.status(404).json({ success: false, message: 'Payment not found or access denied.' });
+    }
 
     const result = await pool.query(
       `UPDATE payments SET payment_status = 'rejected', rejection_reason = $1, verified_by_admin = false, updated_at = NOW()
