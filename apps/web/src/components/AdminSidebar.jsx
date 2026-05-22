@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Home, Building2, Wrench, CreditCard, UserCircle, LogOut } from 'lucide-react';
+import { Home, Building2, Wrench, CreditCard, UserCircle, BarChart2, LogOut } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 const SIDEBAR_COLOR = '#277571';
@@ -10,6 +10,7 @@ const navItems = [
   { label: 'Units',        icon: Building2,   to: '/admin/units' },
   { label: 'Payments',     icon: CreditCard,  to: '/admin/payments' },
   { label: 'Fix Requests', icon: Wrench,      to: '/admin/maintenance' },
+  { label: 'Reports',      icon: BarChart2,   to: '/admin/reports' },
   { label: 'Profile',      icon: UserCircle,  to: '/admin/profile' },
 ];
 

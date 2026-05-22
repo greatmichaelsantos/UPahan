@@ -12,6 +12,7 @@ const maintenanceRoutes = require('./routes/maintenance');
 const usersRoutes = require('./routes/users');
 const documentsRoutes = require('./routes/documents');
 const notificationsRoutes = require('./routes/notifications');
+const reportsRoutes = require('./routes/reports');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -43,6 +44,7 @@ app.use('/api/maintenance', maintenanceRoutes);
 app.use('/api/users', usersRoutes);
 app.use('/api/documents', documentsRoutes);
 app.use('/api/notifications', notificationsRoutes);
+app.use('/api/reports', reportsRoutes);
 
 app.get('/api/health', (req, res) => {
   res.json({ success: true, message: 'UPahan API is running', timestamp: new Date() });

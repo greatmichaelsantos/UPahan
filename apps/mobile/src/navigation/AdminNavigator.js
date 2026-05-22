@@ -12,6 +12,7 @@ import AdminPaymentRequests  from '../screens/admin/AdminPaymentRequests';
 import AdminMaintenanceList  from '../screens/admin/AdminMaintenanceList';
 import AdminMaintenanceDetail from '../screens/admin/AdminMaintenanceDetail';
 import AdminProfile          from '../screens/admin/AdminProfile';
+import AdminReports          from '../screens/admin/AdminReports';
 
 const Tab   = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
@@ -53,6 +54,14 @@ function MaintenanceStack() {
   );
 }
 
+function ReportsStack() {
+  return (
+    <Stack.Navigator screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="AdminReports" component={AdminReports} />
+    </Stack.Navigator>
+  );
+}
+
 function ProfileStack() {
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
@@ -66,6 +75,7 @@ const TAB_ICONS = {
   Units:    ['business',       'business-outline'],
   Payments: ['card',           'card-outline'],
   Fixes:    ['construct',      'construct-outline'],
+  Reports:  ['bar-chart',      'bar-chart-outline'],
   Profile:  ['person-circle',  'person-circle-outline'],
 };
 
@@ -92,10 +102,11 @@ export default function AdminNavigator() {
         },
       })}
     >
-      <Tab.Screen name="Admin"    component={DashboardStack}   options={{ tabBarLabel: 'DASHBOARD' }} />
+      <Tab.Screen name="Admin"    component={DashboardStack}   options={{ tabBarLabel: 'HOME' }} />
       <Tab.Screen name="Units"    component={UnitsStack}       options={{ tabBarLabel: 'UNITS' }} />
       <Tab.Screen name="Payments" component={PaymentsStack}    options={{ tabBarLabel: 'PAYMENTS' }} />
       <Tab.Screen name="Fixes"    component={MaintenanceStack} options={{ tabBarLabel: 'FIXES' }} />
+      <Tab.Screen name="Reports"  component={ReportsStack}     options={{ tabBarLabel: 'REPORTS' }} />
       <Tab.Screen name="Profile"  component={ProfileStack}     options={{ tabBarLabel: 'PROFILE' }} />
     </Tab.Navigator>
   );

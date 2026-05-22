@@ -6,6 +6,8 @@ import SplashPage from './pages/splash/SplashPage';
 import RoleSelectPage from './pages/auth/RoleSelectPage';
 import LoginPage from './pages/auth/LoginPage';
 import RegisterPage from './pages/auth/RegisterPage';
+import ForgotPasswordPage from './pages/auth/ForgotPasswordPage';
+import ResetPasswordPage from './pages/auth/ResetPasswordPage';
 
 import AdminDashboard from './pages/admin/AdminDashboard';
 import AdminUnitList from './pages/admin/AdminUnitList';
@@ -15,6 +17,7 @@ import AdminMaintenanceDetail from './pages/admin/AdminMaintenanceDetail';
 import AdminUnitDetail from './pages/admin/AdminUnitDetail';
 import AdminPaymentRequests from './pages/admin/AdminPaymentRequests';
 import AdminProfile from './pages/admin/AdminProfile';
+import AdminReports from './pages/admin/AdminReports';
 
 import TenantDashboard from './pages/tenant/TenantDashboard';
 import TenantMaintenanceRequest from './pages/tenant/TenantMaintenanceRequest';
@@ -22,6 +25,7 @@ import TenantMaintenanceHistory from './pages/tenant/TenantMaintenanceHistory';
 import TenantPaymentHistory from './pages/tenant/TenantPaymentHistory';
 import TenantDocuments from './pages/tenant/TenantDocuments';
 import TenantProfile from './pages/tenant/TenantProfile';
+import TenantReports from './pages/tenant/TenantReports';
 
 import GuestUnits from './pages/guest/GuestUnits';
 import GuestUnitDetail from './pages/guest/GuestUnitDetail';
@@ -44,6 +48,8 @@ const AppRoutes = () => {
       <Route path="/select-role" element={<RoleSelectPage />} />
       <Route path="/login/:role" element={<LoginPage />} />
       <Route path="/register/:role" element={<RegisterPage />} />
+      <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+      <Route path="/reset-password" element={<ResetPasswordPage />} />
 
       <Route path="/admin" element={
         <ProtectedRoute requiredRole="admin"><AdminDashboard /></ProtectedRoute>
@@ -69,6 +75,9 @@ const AppRoutes = () => {
       <Route path="/admin/profile" element={
         <ProtectedRoute requiredRole="admin"><AdminProfile /></ProtectedRoute>
       } />
+      <Route path="/admin/reports" element={
+        <ProtectedRoute requiredRole="admin"><AdminReports /></ProtectedRoute>
+      } />
 
       <Route path="/tenant" element={
         <ProtectedRoute requiredRole="tenant"><TenantDashboard /></ProtectedRoute>
@@ -87,6 +96,9 @@ const AppRoutes = () => {
       } />
       <Route path="/tenant/profile" element={
         <ProtectedRoute requiredRole="tenant"><TenantProfile /></ProtectedRoute>
+      } />
+      <Route path="/tenant/reports" element={
+        <ProtectedRoute requiredRole="tenant"><TenantReports /></ProtectedRoute>
       } />
 
       <Route path="/units" element={<GuestUnits />} />

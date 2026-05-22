@@ -10,54 +10,62 @@ import TenantPaymentHistory     from '../screens/tenant/TenantPaymentHistory';
 import TenantPaymentDeclare     from '../screens/tenant/TenantPaymentDeclare';
 import TenantProfile            from '../screens/tenant/TenantProfile';
 import TenantDocuments          from '../screens/tenant/TenantDocuments';
+import TenantReports            from '../screens/tenant/TenantReports';
 
-const Tab   = createBottomTabNavigator();
-const Stack = createNativeStackNavigator();
-const BLUE  = '#4A90D9';
+const Tab        = createBottomTabNavigator();
+const InnerStack = createNativeStackNavigator();
+const OuterStack = createNativeStackNavigator();
+const BLUE       = '#4A90D9';
 
 function HomeStack() {
   return (
-    <Stack.Navigator screenOptions={{ headerShown: false }}>
-      <Stack.Screen name="TenantDashboard" component={TenantDashboard} />
-    </Stack.Navigator>
+    <InnerStack.Navigator screenOptions={{ headerShown: false }}>
+      <InnerStack.Screen name="TenantDashboard" component={TenantDashboard} />
+    </InnerStack.Navigator>
   );
 }
 
 function RequestStack() {
   return (
-    <Stack.Navigator screenOptions={{ headerShown: false }}>
-      <Stack.Screen name="TenantMaintenanceHistory" component={TenantMaintenanceHistory} />
-      <Stack.Screen name="TenantMaintenanceRequest" component={TenantMaintenanceRequest} />
-    </Stack.Navigator>
+    <InnerStack.Navigator screenOptions={{ headerShown: false }}>
+      <InnerStack.Screen name="TenantMaintenanceHistory" component={TenantMaintenanceHistory} />
+    </InnerStack.Navigator>
   );
 }
 
 function PaymentsStack() {
   return (
-    <Stack.Navigator screenOptions={{ headerShown: false }}>
-      <Stack.Screen name="TenantPaymentHistory" component={TenantPaymentHistory} />
-      <Stack.Screen name="TenantPaymentDeclare" component={TenantPaymentDeclare} />
-    </Stack.Navigator>
+    <InnerStack.Navigator screenOptions={{ headerShown: false }}>
+      <InnerStack.Screen name="TenantPaymentHistory" component={TenantPaymentHistory} />
+    </InnerStack.Navigator>
+  );
+}
+
+function ReportsStack() {
+  return (
+    <InnerStack.Navigator screenOptions={{ headerShown: false }}>
+      <InnerStack.Screen name="TenantReports" component={TenantReports} />
+    </InnerStack.Navigator>
   );
 }
 
 function ProfileStack() {
   return (
-    <Stack.Navigator screenOptions={{ headerShown: false }}>
-      <Stack.Screen name="TenantProfile"   component={TenantProfile} />
-      <Stack.Screen name="TenantDocuments" component={TenantDocuments} />
-    </Stack.Navigator>
+    <InnerStack.Navigator screenOptions={{ headerShown: false }}>
+      <InnerStack.Screen name="TenantProfile" component={TenantProfile} />
+    </InnerStack.Navigator>
   );
 }
 
 const TAB_ICONS = {
-  Home:     ['home',          'home-outline'],
-  Request:  ['construct',     'construct-outline'],
-  Payments: ['card',          'card-outline'],
-  Profile:  ['person',        'person-outline'],
+  Home:     ['home',      'home-outline'],
+  Request:  ['construct', 'construct-outline'],
+  Payments: ['card',      'card-outline'],
+  Reports:  ['bar-chart', 'bar-chart-outline'],
+  Profile:  ['person',    'person-outline'],
 };
 
-export default function TenantNavigator() {
+function TenantTabs() {
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
@@ -83,7 +91,19 @@ export default function TenantNavigator() {
       <Tab.Screen name="Home"     component={HomeStack}     options={{ tabBarLabel: 'HOME' }} />
       <Tab.Screen name="Request"  component={RequestStack}  options={{ tabBarLabel: 'MAINTENANCE' }} />
       <Tab.Screen name="Payments" component={PaymentsStack} options={{ tabBarLabel: 'PAYMENTS' }} />
+      <Tab.Screen name="Reports"  component={ReportsStack}  options={{ tabBarLabel: 'REPORTS' }} />
       <Tab.Screen name="Profile"  component={ProfileStack}  options={{ tabBarLabel: 'PROFILE' }} />
     </Tab.Navigator>
+  );
+}
+
+export default function TenantNavigator() {
+  return (
+    <OuterStack.Navigator screenOptions={{ headerShown: false }}>
+      <OuterStack.Screen name="TenantTabs"               component={TenantTabs} />
+      <OuterStack.Screen name="TenantDocuments"          component={TenantDocuments} />
+      <OuterStack.Screen name="TenantPaymentDeclare"     component={TenantPaymentDeclare} />
+      <OuterStack.Screen name="TenantMaintenanceRequest" component={TenantMaintenanceRequest} />
+    </OuterStack.Navigator>
   );
 }
