@@ -34,10 +34,11 @@ const LEGEND = [
   { status: 'partial',          label: 'Partial',         color: '#3A5BA0' },
   { status: 'pending_approval', label: 'Pending Review',  color: '#E07B39' },
   { status: 'late',             label: 'Late',            color: '#D64045' },
-  { status: 'rejected',         label: 'Rejected',        color: '#D64045' },
+  { status: 'rejected',         label: 'Not Verified',    color: '#D64045' },
 ];
 
 const METHOD_LABEL = { Cash: 'Cash', GCash: 'GCash', Maya: 'Maya', 'Bank Transfer': 'Bank Transfer', Other: 'Other' };
+const API_URL = import.meta.env.VITE_API_URL || '';
 
 export default function TenantPaymentHistory() {
   const navigate  = useNavigate();
@@ -230,7 +231,7 @@ export default function TenantPaymentHistory() {
                           {entry.rejection_reason && (
                             <div style={{ marginTop: 8, background: '#FEF2F2', borderRadius: 8, padding: '6px 10px' }}>
                               <p style={{ fontFamily: 'Inter', fontSize: 11, color: '#D64045' }}>
-                                Rejected: {entry.rejection_reason}
+                                Not Verified: {entry.rejection_reason}
                               </p>
                             </div>
                           )}
@@ -296,20 +297,21 @@ export default function TenantPaymentHistory() {
                         if (proofs.length === 0) return null;
                         return (
                           <div style={{ display: 'flex', gap: 8, overflowX: 'auto', marginBottom: 10, paddingBottom: 4 }}>
-                            {proofs.map((src, idx) =>
-                              src.endsWith('.pdf') ? (
-                                <a key={idx} href={src} target="_blank" rel="noreferrer"
+                            {proofs.map((src, idx) => {
+                              const fullSrc = src.startsWith('http') ? src : `${API_URL}${src}`;
+                              return src.endsWith('.pdf') ? (
+                                <a key={idx} href={fullSrc} target="_blank" rel="noreferrer"
                                   style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontFamily: 'Inter', fontSize: 12, color: '#3A7BD5', fontWeight: 600, textDecoration: 'underline', flexShrink: 0 }}>
                                   📄 PDF {proofs.length > 1 ? idx + 1 : ''}
                                 </a>
                               ) : (
-                                <a key={idx} href={src} target="_blank" rel="noreferrer" style={{ flexShrink: 0 }}>
-                                  <img src={src} alt={`Proof ${idx + 1}`}
+                                <a key={idx} href={fullSrc} target="_blank" rel="noreferrer" style={{ flexShrink: 0 }}>
+                                  <img src={fullSrc} alt={`Proof ${idx + 1}`}
                                     style={{ width: 72, height: 72, objectFit: 'cover', borderRadius: 8, border: '1px solid #E0DDD8', cursor: 'pointer' }}
                                   />
                                 </a>
-                              )
-                            )}
+                              );
+                            })}
                           </div>
                         );
                       })()}

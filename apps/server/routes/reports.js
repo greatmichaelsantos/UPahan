@@ -32,7 +32,7 @@ router.get('/landlord', verifyToken, requireRole('admin'), async (req, res) => {
 
     // Units
     const unitsRes = await pool.query(
-      `SELECT vacancy_status FROM units WHERE admin_id = $1 AND is_archived = false`,
+      `SELECT vacancy_status FROM units WHERE admin_id = $1`,
       [adminId]
     );
     const totalUnits    = unitsRes.rows.length;
@@ -73,7 +73,7 @@ router.get('/landlord', verifyToken, requireRole('admin'), async (req, res) => {
 
     // Maintenance in range
     const maintRes = await pool.query(
-      `SELECT m.status, m.category, m.created_at,
+      `SELECT m.status, m.issue_category AS category, m.report_date,
               u.unit_code,
               us.first_name || ' ' || us.last_name AS tenant_name
        FROM maintenance_requests m
@@ -81,7 +81,7 @@ router.get('/landlord', verifyToken, requireRole('admin'), async (req, res) => {
        JOIN tenants t ON m.tenant_id = t.tenant_id
        JOIN users us ON t.user_id = us.user_id
        WHERE u.admin_id = $1
-         AND DATE(m.created_at) BETWEEN $2 AND $3`,
+         AND DATE(m.report_date) BETWEEN $2 AND $3`,
       [adminId, start, end]
     );
     const maint = maintRes.rows;
@@ -93,7 +93,7 @@ router.get('/landlord', verifyToken, requireRole('admin'), async (req, res) => {
       tenant:    m.tenant_name,
       category:  m.category,
       status:    m.status,
-      date:      m.created_at ? m.created_at.toISOString().split('T')[0] : null,
+      date:      m.report_date ? new Date(m.report_date).toISOString().split('T')[0] : null,
     }));
 
     res.json({
@@ -122,8 +122,9 @@ router.get('/landlord', verifyToken, requireRole('admin'), async (req, res) => {
       },
     });
   } catch (err) {
-    console.error('Landlord report error:', err);
-    res.status(500).json({ success: false, message: 'Server error.' });
+    console.error('LANDLORD REPORT ERROR:', err.message);
+    console.error('STACK:', err.stack);
+    res.status(500).json({ success: false, message: err.message || 'Server error.' });
   }
 });
 
@@ -169,9 +170,9 @@ router.get('/tenant', verifyToken, requireRole('tenant'), async (req, res) => {
 
     // Maintenance in range
     const maintRes = await pool.query(
-      `SELECT category, status, created_at
+      `SELECT issue_category AS category, status, report_date
        FROM maintenance_requests
-       WHERE tenant_id = $1 AND DATE(created_at) BETWEEN $2 AND $3`,
+       WHERE tenant_id = $1 AND DATE(report_date) BETWEEN $2 AND $3`,
       [tenant_id, start, end]
     );
     const maint = maintRes.rows;
@@ -181,7 +182,7 @@ router.get('/tenant', verifyToken, requireRole('tenant'), async (req, res) => {
     const maintBreakdown = maint.map(m => ({
       category: m.category,
       status:   m.status,
-      date:     m.created_at ? m.created_at.toISOString().split('T')[0] : null,
+      date:     m.report_date ? new Date(m.report_date).toISOString().split('T')[0] : null,
     }));
 
     res.json({
@@ -194,7 +195,7 @@ router.get('/tenant', verifyToken, requireRole('tenant'), async (req, res) => {
           due_day:      parseInt(due_day) || 5,
         },
         payments: {
-          total_paid,
+          total_paid: totalPaid,
           total_transactions: payments.length,
           late_payments:      latePayments,
           breakdown:          paymentBreakdown,
@@ -208,8 +209,9 @@ router.get('/tenant', verifyToken, requireRole('tenant'), async (req, res) => {
       },
     });
   } catch (err) {
-    console.error('Tenant report error:', err);
-    res.status(500).json({ success: false, message: 'Server error.' });
+    console.error('TENANT REPORT ERROR:', err.message);
+    console.error('STACK:', err.stack);
+    res.status(500).json({ success: false, message: err.message || 'Server error.' });
   }
 });
 
