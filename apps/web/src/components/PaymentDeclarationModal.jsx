@@ -108,7 +108,7 @@ export default function PaymentDeclarationModal({ unit, monthlyRent, onClose, on
     }
   };
 
-  const MAX_PROOF = 5;
+  const MAX_PROOF = 3;
 
   const handleFile = (e) => {
     const incoming = Array.from(e.target.files || []);
@@ -265,7 +265,7 @@ export default function PaymentDeclarationModal({ unit, monthlyRent, onClose, on
           )}
           {paymentType === 'partial' && (
             <div style={{ background: '#FFF8EC', border: '1px solid #E07B39', borderRadius: 8, padding: '8px 12px', fontFamily: 'Inter', fontSize: 12, color: '#E07B39' }}>
-              Enter the amount you are paying now. You can submit another partial declaration after this one is approved.
+              Enter the amount you are paying now. You can submit another partial declaration after this one is verified.
             </div>
           )}
 

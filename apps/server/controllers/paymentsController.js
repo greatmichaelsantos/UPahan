@@ -357,12 +357,12 @@ const approvePayment = async (req, res) => {
     // Notify tenant (non-blocking)
     try {
       await sendNotification(payment.tenant_user_id, 'payment_approved',
-        `Your payment of ₱${parseFloat(payment.amount).toLocaleString('en-PH', { minimumFractionDigits: 2 })} for ${payment.month_covered} has been approved.`,
+        `Your payment of ₱${parseFloat(payment.amount).toLocaleString('en-PH', { minimumFractionDigits: 2 })} for ${payment.month_covered} has been verified.`,
         parseInt(id)
       );
     } catch {}
 
-    res.json({ success: true, message: 'Payment approved and recorded.', data: result.rows[0] });
+    res.json({ success: true, message: 'Payment verified and recorded.', data: result.rows[0] });
   } catch (err) {
     console.error('Approve payment error:', err);
     res.status(500).json({ success: false, message: 'Server error.' });

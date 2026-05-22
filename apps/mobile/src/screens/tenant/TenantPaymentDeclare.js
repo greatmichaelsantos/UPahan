@@ -87,8 +87,8 @@ export default function TenantPaymentDeclare({ navigation, route }) {
   };
 
   const handlePickProofImages = async () => {
-    if (proofImages.length >= 5) {
-      Alert.alert('Maximum reached', 'You can attach up to 5 photos.');
+    if (proofImages.length >= 3) {
+      Alert.alert('Maximum reached', 'You can attach up to 3 photos.');
       return;
     }
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -102,7 +102,7 @@ export default function TenantPaymentDeclare({ navigation, route }) {
       quality: 0.8,
     });
     if (!result.canceled && result.assets?.length > 0) {
-      setProofImages(prev => [...prev, ...result.assets].slice(0, 5));
+      setProofImages(prev => [...prev, ...result.assets].slice(0, 3));
       setFieldErrors(e => ({ ...e, proof: '' }));
     }
   };
@@ -251,7 +251,7 @@ export default function TenantPaymentDeclare({ navigation, route }) {
         {form.paymentType === 'partial' && (
           <View style={s.partialHint}>
             <Text style={s.partialHintText}>
-              Enter the amount you are paying now. You can submit another partial declaration after this one is approved.
+              Enter the amount you are paying now. You can submit another partial declaration after this one is verified.
             </Text>
           </View>
         )}
@@ -317,7 +317,7 @@ export default function TenantPaymentDeclare({ navigation, route }) {
         {/* PROOF OF PAYMENT — required, up to 5 */}
         <View style={s.proofHeaderRow}>
           <Text style={s.fieldLabel}>PROOF OF PAYMENT *</Text>
-          <Text style={s.photoCounter}>{proofImages.length}/5</Text>
+          <Text style={s.photoCounter}>{proofImages.length}/3</Text>
         </View>
         {fieldErrors.proof ? <Text style={[s.inlineError, { marginTop: -4 }]}>{fieldErrors.proof}</Text> : null}
 
@@ -334,7 +334,7 @@ export default function TenantPaymentDeclare({ navigation, route }) {
           </ScrollView>
         )}
 
-        {proofImages.length < 5 && (
+        {proofImages.length < 3 && (
           <TouchableOpacity
             style={[s.uploadZone, fieldErrors.proof && s.uploadZoneError]}
             onPress={handlePickProofImages}

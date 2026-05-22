@@ -60,7 +60,7 @@ export default function AdminPaymentRequests() {
       await api.put(`/payments/${approveTarget.payment_id}/approve`);
       setApproveTarget(null);
       load();
-      showToast('Payment approved and recorded.');
+      showToast('Payment verified and recorded.');
     } catch (err) {
       setApproveTarget(null);
       showToast(err.response?.data?.message || 'Something went wrong.');
@@ -138,6 +138,15 @@ export default function AdminPaymentRequests() {
                     <div>
                       <p style={{ fontFamily: 'Inter', fontWeight: 700, fontSize: 14, color: '#4A4A4A' }}>{d.tenant_name}</p>
                       <p style={{ fontFamily: 'Inter', fontSize: 12, color: '#888888' }}>Unit {d.unit_code}</p>
+                      {d.is_late && (
+                        <span style={{
+                          display: 'inline-block', background: '#FEF3EC', color: '#E07B39',
+                          fontFamily: 'Inter', fontWeight: 700, fontSize: 10,
+                          borderRadius: 4, padding: '2px 7px', letterSpacing: '0.06em', marginTop: 3,
+                        }}>
+                          LATE
+                        </span>
+                      )}
                     </div>
                   </div>
                   <div style={{ textAlign: 'right' }}>

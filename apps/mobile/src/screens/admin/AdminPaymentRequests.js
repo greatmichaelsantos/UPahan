@@ -20,14 +20,26 @@ const ORANGE = '#E07B39';
 
 const AVATAR_COLORS = ['#277571', '#4A90D9', '#E67E22', '#8E44AD', '#C0392B'];
 
+const REJECTION_REASONS = [
+  'Proof of payment is unclear or unreadable',
+  'Wrong payment amount',
+  'Duplicate submission',
+  'Invalid or missing reference number',
+  'Payment not reflected in records',
+  'Wrong month covered',
+  'Other',
+];
+
 export default function AdminPaymentRequests({ navigation }) {
   const [payments, setPayments]     = useState([]);
   const [loading, setLoading]       = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [processing, setProcessing] = useState(null);
 
-  const [rejectModal, setRejectModal] = useState({ visible: false, payment: null });
+  const [rejectModal, setRejectModal]   = useState({ visible: false, payment: null });
   const [rejectReason, setRejectReason] = useState('');
+  const [customReason, setCustomReason] = useState('');
+  const [rejectError, setRejectError]   = useState('');
   const [expandedImage, setExpandedImage] = useState(null);
 
   const intervalRef = useRef(null);
@@ -71,16 +83,23 @@ export default function AdminPaymentRequests({ navigation }) {
 
   const handleReject = payment => {
     setRejectReason('');
+    setCustomReason('');
+    setRejectError('');
     setRejectModal({ visible: true, payment });
   };
 
   const confirmReject = async () => {
+    const finalReason = rejectReason === 'Other' ? customReason.trim() : rejectReason;
+    if (!finalReason) {
+      setRejectError(rejectReason === 'Other' ? 'Please describe the reason.' : 'Please select a reason.');
+      return;
+    }
     const { payment } = rejectModal;
     setRejectModal({ visible: false, payment: null });
     setProcessing(payment.payment_id);
     try {
       await api.put(API_ROUTES.paymentReject(payment.payment_id), {
-        rejectionReason: rejectReason.trim() || 'Rejected by landlord',
+        rejectionReason: finalReason,
       });
       fetchPayments();
     } catch (e) {
@@ -139,6 +158,11 @@ export default function AdminPaymentRequests({ navigation }) {
                   <View style={{ flex: 1 }}>
                     <Text style={s.tenantName}>{item.tenant_name || 'Unknown'}</Text>
                     <Text style={s.unitMeta}>Unit {item.unit_code} · {item.month_covered}</Text>
+                    {item.is_late && (
+                      <View style={s.lateBadge}>
+                        <Text style={s.lateBadgeText}>LATE</Text>
+                      </View>
+                    )}
                   </View>
                   <View style={{ alignItems: 'flex-end' }}>
                     <Text style={s.amount}>{formatPeso(item.amount)}</Text>
@@ -252,23 +276,44 @@ export default function AdminPaymentRequests({ navigation }) {
           behavior={Platform.OS === 'ios' ? 'padding' : undefined}
         >
           <View style={s.modalCard}>
-            <Text style={s.modalTitle}>Reject Payment</Text>
+            <Text style={s.modalTitle}>Not Verify Payment</Text>
             {rejectModal.payment && (
               <Text style={s.modalSubtitle}>
                 {rejectModal.payment.tenant_name} · {formatPeso(rejectModal.payment.amount)}
               </Text>
             )}
-            <Text style={s.modalInputLabel}>Reason for rejection</Text>
-            <TextInput
-              style={s.reasonInput}
-              placeholder="e.g. Amount does not match, unclear proof..."
-              placeholderTextColor={COLORS.textMuted}
-              value={rejectReason}
-              onChangeText={setRejectReason}
-              multiline
-              numberOfLines={3}
-              textAlignVertical="top"
-            />
+            <Text style={s.modalInputLabel}>Reason</Text>
+
+            {REJECTION_REASONS.map(reason => (
+              <TouchableOpacity
+                key={reason}
+                style={[s.reasonOption, rejectReason === reason && s.reasonOptionActive]}
+                onPress={() => { setRejectReason(reason); setRejectError(''); }}
+              >
+                <View style={[s.radioCircle, rejectReason === reason && s.radioCircleActive]} />
+                <Text style={[s.reasonOptionText, rejectReason === reason && { color: COLORS.dangerPrimary, fontWeight: '700' }]}>
+                  {reason}
+                </Text>
+              </TouchableOpacity>
+            ))}
+
+            {rejectReason === 'Other' && (
+              <TextInput
+                style={s.reasonInput}
+                placeholder="Describe the reason..."
+                placeholderTextColor={COLORS.textMuted}
+                value={customReason}
+                onChangeText={t => { setCustomReason(t); setRejectError(''); }}
+                multiline
+                numberOfLines={3}
+                textAlignVertical="top"
+              />
+            )}
+
+            {!!rejectError && (
+              <Text style={s.rejectErrorText}>{rejectError}</Text>
+            )}
+
             <View style={s.modalActions}>
               <TouchableOpacity
                 style={s.modalCancelBtn}
@@ -277,7 +322,7 @@ export default function AdminPaymentRequests({ navigation }) {
                 <Text style={s.modalCancelText}>Cancel</Text>
               </TouchableOpacity>
               <TouchableOpacity style={s.modalRejectBtn} onPress={confirmReject}>
-                <Text style={s.modalRejectText}>Confirm Reject</Text>
+                <Text style={s.modalRejectText}>Confirm</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -367,6 +412,11 @@ const s = StyleSheet.create({
     paddingHorizontal: 12, backgroundColor: COLORS.inputBg,
   },
   noProofText: { fontSize: 12, color: COLORS.textMuted, fontStyle: 'italic' },
+  lateBadge: {
+    backgroundColor: '#FEF3EC', borderRadius: 4, paddingHorizontal: 7, paddingVertical: 2,
+    alignSelf: 'flex-start', marginTop: 3,
+  },
+  lateBadgeText: { fontSize: 10, fontWeight: '700', color: '#E07B39', letterSpacing: 0.6 },
 
   actions:    { flexDirection: 'row', gap: 10, marginTop: 4 },
   rejectBtn: {
@@ -386,18 +436,32 @@ const s = StyleSheet.create({
   },
   modalCard: {
     width: '100%', backgroundColor: '#fff', borderRadius: 20,
-    padding: 24,
+    padding: 24, maxHeight: '85%',
     shadowColor: '#000', shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.2, shadowRadius: 20, elevation: 10,
   },
   modalTitle:      { fontSize: 20, fontWeight: '700', color: COLORS.textPrimary, marginBottom: 4 },
   modalSubtitle:   { fontSize: 13, color: COLORS.textSecondary, marginBottom: 16 },
   modalInputLabel: { fontSize: 11, fontWeight: '700', color: GOLD, letterSpacing: 1, marginBottom: 8 },
+  reasonOption: {
+    flexDirection: 'row', alignItems: 'center', gap: 10,
+    paddingVertical: 10, paddingHorizontal: 12, borderRadius: 10,
+    borderWidth: 1.5, borderColor: COLORS.borderLight, marginBottom: 6,
+    backgroundColor: '#fff',
+  },
+  reasonOptionActive: { borderColor: COLORS.dangerPrimary, backgroundColor: '#FFF5F5' },
+  radioCircle: {
+    width: 16, height: 16, borderRadius: 8,
+    borderWidth: 2, borderColor: COLORS.borderLight, backgroundColor: '#fff',
+  },
+  radioCircleActive: { borderColor: COLORS.dangerPrimary, backgroundColor: COLORS.dangerPrimary },
+  reasonOptionText: { flex: 1, fontSize: 13, color: COLORS.textPrimary },
   reasonInput: {
     borderWidth: 1.5, borderColor: COLORS.inputBorder, borderRadius: 12,
     padding: 12, fontSize: 14, color: COLORS.textPrimary,
-    backgroundColor: COLORS.inputBg, minHeight: 90, marginBottom: 20,
+    backgroundColor: COLORS.inputBg, minHeight: 72, marginTop: 4, marginBottom: 8,
   },
-  modalActions:     { flexDirection: 'row', gap: 10 },
+  rejectErrorText: { fontSize: 12, color: COLORS.dangerPrimary, marginBottom: 10 },
+  modalActions:     { flexDirection: 'row', gap: 10, marginTop: 8 },
   modalCancelBtn: {
     flex: 1, paddingVertical: 14, borderRadius: 999,
     borderWidth: 1.5, borderColor: COLORS.borderLight, alignItems: 'center',
