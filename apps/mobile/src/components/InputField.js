@@ -8,6 +8,7 @@ export default function InputField({
   icon, placeholder, value, onChangeText,
   secureTextEntry, keyboardType = 'default',
   autoCapitalize = 'none', style, editable = true,
+  onFocus, onBlur,
 }) {
   const [showPw, setShowPw] = useState(false);
   const secure = secureTextEntry && !showPw;
@@ -25,6 +26,8 @@ export default function InputField({
         keyboardType={keyboardType}
         autoCapitalize={autoCapitalize}
         editable={editable}
+        onFocus={onFocus}
+        onBlur={onBlur}
       />
       {secureTextEntry ? (
         <TouchableOpacity onPress={() => setShowPw(v => !v)} style={s.eye}>

@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useRef } from 'react';
+﻿import React, { useState, useCallback, useRef } from 'react';
 import {
   View, Text, FlatList, StyleSheet, TouchableOpacity,
   TextInput, RefreshControl, StatusBar
@@ -69,7 +69,6 @@ export default function AdminUnitList({ navigation }) {
       {/* Teal header */}
       <View style={s.header}>
         <View style={{ flex: 1 }}>
-          <Text style={s.headerLabel}>INVENTORY</Text>
           <Text style={s.headerTitle}>Unit List</Text>
         </View>
         <TouchableOpacity
@@ -141,9 +140,7 @@ export default function AdminUnitList({ navigation }) {
               <View style={s.cardBody}>
                 <Text style={s.unitCode}>Unit {item.unit_code}</Text>
                 <Text style={s.tenantName}>
-                  {item.current_tenant
-                    ? `${item.current_tenant.first_name} ${item.current_tenant.last_name}`
-                    : 'No tenant assigned'}
+                  {item.tenant_name || 'No tenant assigned'}
                 </Text>
                 {item.location ? (
                   <Text style={s.location} numberOfLines={1}>{item.location}</Text>
@@ -169,7 +166,7 @@ const s = StyleSheet.create({
     backgroundColor: TEAL, paddingHorizontal: 20, paddingTop: 20, paddingBottom: 24,
   },
   headerLabel: { fontSize: 11, fontWeight: '700', color: GOLD, letterSpacing: 1.5, marginBottom: 4 },
-  headerTitle: { fontSize: 28, fontWeight: '700', fontFamily: 'serif', color: '#fff' },
+  headerTitle: { fontSize: 28, fontWeight: '700', fontFamily: 'Inter_700Bold', color: '#fff' },
   addBtn: {
     backgroundColor: 'rgba(255,255,255,0.2)',
     width: 40, height: 40, borderRadius: 999,
@@ -200,5 +197,5 @@ const s = StyleSheet.create({
   unitCode:   { fontSize: 15, fontWeight: '700', color: COLORS.textPrimary },
   tenantName: { fontSize: 13, color: COLORS.textSecondary },
   location:   { fontSize: 11, color: COLORS.textMuted },
-  price:      { fontSize: 13, fontWeight: '700', color: TEAL, fontFamily: 'serif' },
+  price:      { fontSize: 13, fontWeight: '700', color: TEAL, fontFamily: 'Inter_700Bold' },
 });

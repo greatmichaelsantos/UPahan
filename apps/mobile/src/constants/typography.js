@@ -1,7 +1,7 @@
-export const FONTS = {
-  headingLarge:   { fontSize: 28, fontWeight: '700', fontFamily: 'serif', color: '#1A1A1A' },
-  headingMedium:  { fontSize: 22, fontWeight: '700', fontFamily: 'serif', color: '#1A1A1A' },
-  headingSmall:   { fontSize: 18, fontWeight: '700', fontFamily: 'serif', color: '#1A1A1A' },
+﻿export const FONTS = {
+  headingLarge:   { fontSize: 28, fontWeight: '700', fontFamily: 'Inter_700Bold', color: '#1A1A1A' },
+  headingMedium:  { fontSize: 22, fontWeight: '700', fontFamily: 'Inter_700Bold', color: '#1A1A1A' },
+  headingSmall:   { fontSize: 18, fontWeight: '700', fontFamily: 'Inter_700Bold', color: '#1A1A1A' },
   labelUpper:     { fontSize: 11, fontWeight: '700', letterSpacing: 1.5, color: '#666666', textTransform: 'uppercase' },
   labelUpperGold: { fontSize: 11, fontWeight: '700', letterSpacing: 1.5, color: '#C9A84C', textTransform: 'uppercase' },
   bodyLarge:      { fontSize: 16, fontWeight: '400', color: '#1A1A1A' },

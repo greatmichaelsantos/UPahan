@@ -61,7 +61,7 @@ export default function TenantMaintenanceHistory() {
             {[1,2,3].map(i => <div key={i} className="card" style={{ height: 76, background: '#F0EEEB' }} />)}
           </div>
         ) : requests.length === 0 ? (
-          <EmptyState icon={CheckCircle} title="No Requests Yet" message="Submit a new request if you have a maintenance issue." />
+          <EmptyState icon={CheckCircle} title="No Requests Yet" message="Submit a new request if you have a maintenance issue." iconColor="#4A90D9" iconBg="#EBF4FF" />
         ) : (
           <>
             {/* HISTORY label with gold line */}

@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { STORAGE_KEYS } from '@upahan/shared';
 import api from '../api/client';
@@ -42,11 +42,7 @@ export function AuthProvider({ children }) {
   const register = async (data) => {
     try {
       const res = await api.post('/auth/register', data);
-      const { user: userData, token } = res.data.data;
-      await AsyncStorage.setItem(STORAGE_KEYS.TOKEN, token);
-      await AsyncStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(userData));
-      setUser(userData);
-      return { success: true, user: userData };
+      return { success: true, message: res.data.message };
     } catch (err) {
       return { success: false, message: err.response?.data?.message || 'Registration failed.' };
     }
@@ -68,8 +64,21 @@ export function AuthProvider({ children }) {
     setUser(updated);
   };
 
+  const refreshTenantInfo = useCallback(async () => {
+    try {
+      const res = await api.get('/tenants/me');
+      const tInfo = res.data.data || null;
+      await AsyncStorage.setItem(STORAGE_KEYS.TENANT, JSON.stringify(tInfo));
+      setTenantInfo(tInfo);
+    } catch {
+      // 404 means no active tenancy yet — clear stale data
+      await AsyncStorage.removeItem(STORAGE_KEYS.TENANT);
+      setTenantInfo(null);
+    }
+  }, []);
+
   return (
-    <AuthContext.Provider value={{ user, tenantInfo, loading, login, logout, register, updateUser }}>
+    <AuthContext.Provider value={{ user, tenantInfo, loading, login, logout, register, updateUser, refreshTenantInfo }}>
       {children}
     </AuthContext.Provider>
   );

@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+﻿import React, { useState, useCallback } from 'react';
 import {
   View, Text, FlatList, StyleSheet, TouchableOpacity,
   RefreshControl, StatusBar
@@ -79,7 +79,8 @@ export default function TenantMaintenanceHistory({ navigation }) {
             icon="construct-outline"
             title="No requests yet"
             message="Tap the button above to submit a maintenance request."
-            color={BLUE}
+            iconColor={BLUE}
+            iconBg="#EBF4FF"
           />
         }
         renderItem={({ item }) => {
@@ -119,7 +120,7 @@ const s = StyleSheet.create({
     backgroundColor: '#fff', paddingHorizontal: 20, paddingVertical: 14,
     borderBottomWidth: 1, borderBottomColor: COLORS.borderLight,
   },
-  pageTitle: { fontSize: 26, fontWeight: '700', fontFamily: 'serif', color: COLORS.textPrimary },
+  pageTitle: { fontSize: 26, fontWeight: '700', fontFamily: 'Inter_700Bold', color: COLORS.textPrimary },
   btnWrap:   { paddingHorizontal: 20, paddingVertical: 14 },
   newBtn: {
     height: 52, borderRadius: 999, backgroundColor: BLUE,

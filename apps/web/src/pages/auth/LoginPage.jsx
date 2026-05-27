@@ -16,8 +16,8 @@ const EmailInput = ({ value, onChange, accent, accentLight }) => {
         onFocus={() => setFocused(true)} onBlur={() => setFocused(false)}
         style={{
           width: '100%', height: 52, borderRadius: 8,
-          background: focused ? accentLight : '#F0EEEB',
-          border: `1.5px solid ${focused ? accent : 'transparent'}`,
+          background: focused ? accentLight : '#fff',
+          border: `1.5px solid ${focused ? accent : '#D1D5DB'}`,
           fontFamily: 'Inter', fontSize: 14, color: '#4A4A4A',
           paddingLeft: 44, paddingRight: 14, outline: 'none', transition: 'all 150ms ease',
         }}
@@ -37,8 +37,8 @@ const PasswordInput = ({ value, onChange, showPass, onToggle, accent, accentLigh
         onFocus={() => setFocused(true)} onBlur={() => setFocused(false)}
         style={{
           width: '100%', height: 52, borderRadius: 8,
-          background: focused ? accentLight : '#F0EEEB',
-          border: `1.5px solid ${focused ? accent : 'transparent'}`,
+          background: focused ? accentLight : '#fff',
+          border: `1.5px solid ${focused ? accent : '#D1D5DB'}`,
           fontFamily: 'Inter', fontSize: 14, color: '#4A4A4A',
           paddingLeft: 44, paddingRight: 44, outline: 'none', transition: 'all 150ms ease',
         }}
@@ -156,9 +156,13 @@ export default function LoginPage() {
           </div>
 
           <div style={{ textAlign: 'right', marginTop: -8 }}>
-            <span style={{ fontFamily: 'Inter', fontSize: 12, color: '#888888', cursor: 'default' }}>
+            <button
+              type="button"
+              onClick={() => navigate(`/forgot-password?role=${role}`)}
+              style={{ fontFamily: 'Inter', fontSize: 12, color: accent, background: 'none', border: 'none', cursor: 'pointer', padding: 0, fontWeight: 600 }}
+            >
               Forgot password?
-            </span>
+            </button>
           </div>
 
           <button

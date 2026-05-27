@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import { View, Text, TouchableOpacity, ScrollView, StyleSheet, StatusBar } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -106,7 +106,7 @@ const s = StyleSheet.create({
   houseBox: { width: 28, height: 28, borderRadius: 8, backgroundColor: COLORS.landlordLight, alignItems: 'center', justifyContent: 'center' },
   brandText:{ fontSize: 15, fontWeight: '800', color: COLORS.landlordPrimary, letterSpacing: 2 },
   brandTag: { fontSize: 11, fontWeight: '600', color: COLORS.textMuted, letterSpacing: 1 },
-  heading:  { fontSize: 28, fontWeight: '700', fontFamily: 'serif', color: COLORS.textPrimary, marginBottom: 6 },
+  heading:  { fontSize: 28, fontWeight: '700', fontFamily: 'Inter_700Bold', color: COLORS.textPrimary, marginBottom: 6 },
   headingSub:{ fontSize: 14, color: COLORS.textSecondary, marginBottom: 24 },
   cards:    { gap: 12, marginBottom: 12 },
   card: {

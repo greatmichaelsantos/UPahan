@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useRef } from 'react';
+﻿import React, { useState, useCallback, useRef } from 'react';
 import {
   View, Text, ScrollView, StyleSheet, TouchableOpacity,
   RefreshControl, ActivityIndicator, StatusBar
@@ -20,10 +20,7 @@ export default function AdminDashboard({ navigation }) {
   const [loading, setLoading]       = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
-  // Calendar state
   const now = new Date();
-  const [calMonth, setCalMonth] = useState(now.getMonth());
-  const [calYear, setCalYear]   = useState(now.getFullYear());
 
   const intervalRef = useRef(null);
 
@@ -64,22 +61,14 @@ export default function AdminDashboard({ navigation }) {
   const pendingPayments = stats?.pendingPayments ?? 0;
   const monthYear      = now.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
 
-  // Calendar helpers
-  const prevMonth = () => {
-    if (calMonth === 0) { setCalMonth(11); setCalYear(y => y - 1); }
-    else setCalMonth(m => m - 1);
-  };
-  const nextMonth = () => {
-    if (calMonth === 11) { setCalMonth(0); setCalYear(y => y + 1); }
-    else setCalMonth(m => m + 1);
-  };
-  const calMonthLabel  = new Date(calYear, calMonth).toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
-  const daysInMonth    = new Date(calYear, calMonth + 1, 0).getDate();
-  const firstDay       = new Date(calYear, calMonth, 1).getDay();
-  const isCurrentMonth = calMonth === now.getMonth() && calYear === now.getFullYear();
-  const calCells       = [];
-  for (let i = 0; i < firstDay; i++) calCells.push(null);
-  for (let d = 1; d <= daysInMonth; d++) calCells.push(d);
+  const monthLabel = now.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+  const weekStart  = new Date(now);
+  weekStart.setDate(now.getDate() - now.getDay());
+  const weekDays   = Array.from({ length: 7 }, (_, i) => {
+    const d = new Date(weekStart);
+    d.setDate(weekStart.getDate() + i);
+    return d;
+  });
 
   return (
     <SafeAreaView style={s.container} edges={['top']}>
@@ -98,11 +87,13 @@ export default function AdminDashboard({ navigation }) {
         {/* TEAL HEADER */}
         <View style={s.header}>
           <View style={{ flex: 1 }}>
-            <Text style={s.headerLabel}>LANDLORD</Text>
-            <Text style={s.headerTitle}>Property Overview</Text>
-            <Text style={s.headerSub}>Welcome back, {userName}</Text>
+            <View style={s.logoRow}>
+              <Ionicons name="home" size={22} color="#fff" />
+              <Text style={s.brand}>UPAHAN</Text>
+            </View>
+            <Text style={s.brandSub}>RGT REAL ESTATE MARKETING</Text>
           </View>
-          <TouchableOpacity style={{ padding: 4, marginTop: 4 }}>
+          <TouchableOpacity style={{ padding: 4 }}>
             <Ionicons name="notifications-outline" size={22} color="#FFF" />
           </TouchableOpacity>
         </View>
@@ -186,30 +177,20 @@ export default function AdminDashboard({ navigation }) {
             {/* CALENDAR */}
             <Text style={s.calLabel}>CALENDAR</Text>
             <View style={s.calCard}>
-              <View style={s.calNavRow}>
-                <TouchableOpacity onPress={prevMonth} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
-                  <Ionicons name="chevron-back" size={20} color={COLORS.textPrimary} />
-                </TouchableOpacity>
-                <Text style={s.calMonthText}>{calMonthLabel}</Text>
-                <TouchableOpacity onPress={nextMonth} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
-                  <Ionicons name="chevron-forward" size={20} color={COLORS.textPrimary} />
-                </TouchableOpacity>
-              </View>
+              <Text style={s.calMonthText}>{monthLabel}</Text>
               <View style={s.calDayHeaders}>
                 {['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'].map(d => (
                   <Text key={d} style={s.calDayHeader}>{d}</Text>
                 ))}
               </View>
               <View style={s.calGrid}>
-                {calCells.map((day, i) => {
-                  const isToday = isCurrentMonth && day === now.getDate();
+                {weekDays.map((d, i) => {
+                  const isToday = d.toDateString() === now.toDateString();
                   return (
                     <View key={i} style={s.calCell}>
-                      {day !== null && (
-                        <View style={[s.calDayCircle, isToday && s.calToday]}>
-                          <Text style={[s.calDayText, isToday && s.calTodayText]}>{day}</Text>
-                        </View>
-                      )}
+                      <View style={[s.calDayCircle, isToday && s.calToday]}>
+                        <Text style={[s.calDayText, isToday && s.calTodayText]}>{d.getDate()}</Text>
+                      </View>
                     </View>
                   );
                 })}
@@ -226,26 +207,26 @@ const s = StyleSheet.create({
   container: { flex: 1, backgroundColor: COLORS.pageBg },
   header: {
     backgroundColor: TEAL,
-    paddingHorizontal: 20, paddingTop: 16, paddingBottom: 36,
-    flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start',
+    paddingHorizontal: 20, paddingTop: 16, paddingBottom: 16,
+    flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
   },
-  headerLabel: { fontSize: 11, fontWeight: '700', letterSpacing: 1.5, color: GOLD, marginBottom: 4 },
-  headerTitle: { fontSize: 24, fontWeight: '700', fontFamily: 'serif', color: '#FFF', marginBottom: 4 },
-  headerSub:   { fontSize: 14, color: 'rgba(255,255,255,0.8)' },
+  logoRow:  { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  brand:    { fontSize: 20, fontWeight: '700', color: '#fff', letterSpacing: 0.4 },
+  brandSub: { fontSize: 10, color: 'rgba(255,255,255,0.6)', letterSpacing: 1, marginTop: 3 },
 
   rentCard: {
-    backgroundColor: '#FFF', borderRadius: 16,
-    marginHorizontal: 16, marginTop: -20, padding: 16,
-    shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.08, shadowRadius: 8, elevation: 4,
+    backgroundColor: TEAL, borderRadius: 16,
+    marginHorizontal: 16, marginTop: 16, padding: 16,
+    shadowColor: TEAL, shadowOffset: { width: 0, height: 6 }, shadowOpacity: 0.3, shadowRadius: 12, elevation: 6,
   },
-  rentLabel:    { fontSize: 11, fontWeight: '700', letterSpacing: 1.2, color: '#888', textTransform: 'uppercase' },
-  inProgressBadge: { backgroundColor: COLORS.pendingBg, borderRadius: 999, paddingHorizontal: 10, paddingVertical: 3 },
-  inProgressText:  { fontSize: 10, fontWeight: '700', color: COLORS.pendingText, textTransform: 'uppercase', letterSpacing: 0.8 },
-  rentPct:      { fontSize: 44, fontWeight: '700', color: COLORS.textPrimary, marginTop: 8, fontFamily: 'serif' },
-  rentSubLabel: { fontSize: 10, fontWeight: '700', letterSpacing: 1, color: '#888', textTransform: 'uppercase', marginTop: 2 },
-  rentUnits:    { fontSize: 13, color: '#666', marginTop: 4, marginBottom: 10 },
-  progressBg:   { height: 6, backgroundColor: '#E0E0E0', borderRadius: 3 },
-  progressFill: { height: 6, backgroundColor: TEAL, borderRadius: 3 },
+  rentLabel:    { fontSize: 11, fontWeight: '700', letterSpacing: 1.2, color: 'rgba(255,255,255,0.7)', textTransform: 'uppercase' },
+  inProgressBadge: { backgroundColor: '#F0CF6A', borderRadius: 999, paddingHorizontal: 10, paddingVertical: 3 },
+  inProgressText:  { fontSize: 10, fontWeight: '700', color: '#277571', textTransform: 'uppercase', letterSpacing: 0.8 },
+  rentPct:      { fontSize: 44, fontWeight: '700', color: '#fff', marginTop: 8, fontFamily: 'Inter_700Bold' },
+  rentSubLabel: { fontSize: 10, fontWeight: '700', letterSpacing: 1, color: 'rgba(255,255,255,0.7)', textTransform: 'uppercase', marginTop: 2 },
+  rentUnits:    { fontSize: 13, color: 'rgba(255,255,255,0.8)', marginTop: 4, marginBottom: 10 },
+  progressBg:   { height: 6, backgroundColor: 'rgba(255,255,255,0.3)', borderRadius: 3 },
+  progressFill: { height: 6, backgroundColor: '#fff', borderRadius: 3 },
 
   actionsRow: { flexDirection: 'row', marginHorizontal: 16, marginTop: 12, gap: 12 },
   actionCard: {
@@ -297,14 +278,13 @@ const s = StyleSheet.create({
     shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.06, shadowRadius: 6, elevation: 3,
     marginBottom: 8,
   },
-  calNavRow:    { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 },
-  calMonthText: { fontSize: 16, fontWeight: '600', color: COLORS.textPrimary },
-  calDayHeaders:{ flexDirection: 'row', marginBottom: 4 },
-  calDayHeader: { flex: 1, textAlign: 'center', fontSize: 11, fontWeight: '600', color: '#888' },
-  calGrid:      { flexDirection: 'row', flexWrap: 'wrap' },
-  calCell:      { width: '14.28%', aspectRatio: 1, alignItems: 'center', justifyContent: 'center' },
-  calDayCircle: { width: 32, height: 32, borderRadius: 16, alignItems: 'center', justifyContent: 'center' },
-  calToday:     { backgroundColor: TEAL },
-  calDayText:   { fontSize: 13, color: COLORS.textPrimary },
-  calTodayText: { color: '#FFF', fontWeight: '700' },
+  calMonthText:  { fontSize: 15, fontWeight: '700', color: TEAL, textAlign: 'center', marginBottom: 12 },
+  calDayHeaders: { flexDirection: 'row', marginBottom: 4 },
+  calDayHeader:  { flex: 1, textAlign: 'center', fontSize: 11, fontWeight: '600', color: '#888' },
+  calGrid:       { flexDirection: 'row' },
+  calCell:       { flex: 1, alignItems: 'center', paddingVertical: 4 },
+  calDayCircle:  { width: 32, height: 32, borderRadius: 16, alignItems: 'center', justifyContent: 'center' },
+  calToday:      { backgroundColor: TEAL },
+  calDayText:    { fontSize: 13, color: COLORS.textPrimary },
+  calTodayText:  { color: '#FFF', fontWeight: '700' },
 });

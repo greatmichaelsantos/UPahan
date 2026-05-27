@@ -180,6 +180,23 @@ export default function TenantDashboard() {
               </div>
             )}
 
+            {/* Landlord card */}
+            {unitDetail && (
+              <div className="card">
+                <p style={{ fontFamily: 'Inter', fontWeight: 700, fontSize: 11, color: '#C9A84C', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 10 }}>LANDLORD</p>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', paddingBottom: 8, borderBottom: '1px solid #F0EEEB' }}>
+                    <p style={{ fontFamily: 'Inter', fontSize: 13, color: '#888' }}>Name</p>
+                    <p style={{ fontFamily: 'Inter', fontSize: 13, fontWeight: 600, color: '#4A4A4A' }}>{unitDetail.landlord_name || 'Not provided'}</p>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                    <p style={{ fontFamily: 'Inter', fontSize: 13, color: '#888' }}>Contact</p>
+                    <p style={{ fontFamily: 'Inter', fontSize: 13, fontWeight: 600, color: '#4A4A4A' }}>{unitDetail.landlord_phone || 'Not provided'}</p>
+                  </div>
+                </div>
+              </div>
+            )}
+
             {/* Documents */}
             <div className="card">
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
@@ -260,14 +277,14 @@ export default function TenantDashboard() {
                 onClick={() => navigate('/tenant/payments')}
                 className="card"
                 style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10, padding: 20, cursor: 'pointer', border: 'none', transition: 'all 200ms ease' }}
-                onMouseOver={e => { e.currentTarget.style.background = '#EBF4FF'; e.currentTarget.style.transform = 'translateY(-2px)'; }}
+                onMouseOver={e => { e.currentTarget.style.background = '#E3F0FB'; e.currentTarget.style.transform = 'translateY(-2px)'; }}
                 onMouseOut={e => { e.currentTarget.style.background = 'white'; e.currentTarget.style.transform = 'translateY(0)'; }}
                 aria-label="Payment history"
               >
-                <div style={{ width: 44, height: 44, borderRadius: 10, background: '#EBF4FF', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <div style={{ width: 44, height: 44, borderRadius: 10, background: '#E3F0FB', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                   <Clock size={22} color="#4A90D9" aria-hidden="true" />
                 </div>
-                <span style={{ fontFamily: 'Inter', fontWeight: 600, fontSize: 12, color: '#4A4A4A', textAlign: 'center' }}>PAYMENT HISTORY</span>
+                <span style={{ fontFamily: 'Inter', fontWeight: 600, fontSize: 12, color: '#4A90D9', textAlign: 'center' }}>PAYMENT HISTORY</span>
               </button>
 
               <button

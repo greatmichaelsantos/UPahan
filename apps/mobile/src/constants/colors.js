@@ -1,7 +1,7 @@
 export const COLORS = {
   // Backgrounds
-  splashBg:          '#277571',
-  pageBg:            '#F5F0E8',
+  splashBg:          '#FAF8F5',
+  pageBg:            '#FAF8F5',
   cardBg:            '#FFFFFF',
 
   // Landlord (teal)

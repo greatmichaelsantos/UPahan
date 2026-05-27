@@ -12,6 +12,7 @@
     "assetBundlePatterns": [
       "**/*"
     ],
+    "scheme": "upahan",
     "ios": {
       "supportsTablet": false,
       "bundleIdentifier": "com.upahan.app"

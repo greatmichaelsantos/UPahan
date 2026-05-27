@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Plus, Wrench, TrendingUp, CreditCard } from 'lucide-react';
+import { Plus, Wrench, CreditCard } from 'lucide-react';
 import AdminLayout from '../../components/AdminLayout';
 import Calendar from '../../components/Calendar';
 import api from '../../utils/api';
@@ -27,7 +27,6 @@ export default function AdminDashboard() {
 
   const monthName = new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
 
-  const onTrack = summary.percentage >= 80 ? 'ON TRACK' : summary.percentage >= 50 ? 'IN PROGRESS' : 'NEEDS ATTENTION';
 
   return (
     <AdminLayout title="Dashboard">
@@ -49,28 +48,23 @@ export default function AdminDashboard() {
             {/* Rent Collection Card */}
             <div style={{ background: '#277571', borderRadius: 16, padding: 24 }}>
               <div className="flex items-center justify-between" style={{ marginBottom: 8 }}>
-                <div>
-                  <p style={{ fontFamily: 'Inter', fontWeight: 600, fontSize: 11, color: 'rgba(255,255,255,0.75)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 6 }}>
-                    RENT COLLECTION
-                  </p>
-                  <span style={{ display: 'inline-block', background: 'rgba(255,255,255,0.2)', color: 'white', borderRadius: 999, padding: '3px 10px', fontFamily: 'Inter', fontWeight: 600, fontSize: 11, letterSpacing: '0.04em' }}>
-                    {onTrack}
-                  </span>
-                </div>
-                <div style={{ width: 40, height: 40, borderRadius: 10, background: 'rgba(255,255,255,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <TrendingUp size={20} color="white" aria-hidden="true" />
-                </div>
+                <p style={{ fontFamily: 'Inter', fontWeight: 600, fontSize: 11, color: 'rgba(255,255,255,0.75)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+                  RENT COLLECTION
+                </p>
+                <span style={{ background: '#F0CF6A', color: '#277571', borderRadius: 999, padding: '3px 10px', fontFamily: 'Inter', fontWeight: 700, fontSize: 11, letterSpacing: '0.04em' }}>
+                  IN PROGRESS
+                </span>
               </div>
               <p style={{ fontFamily: 'Inter', fontWeight: 700, fontSize: 48, color: 'white', lineHeight: 1, margin: '8px 0 4px' }}>
                 {summary.percentage}%
               </p>
-              <p style={{ fontFamily: 'Inter', fontSize: 12, color: 'rgba(255,255,255,0.75)', marginBottom: 12 }}>
-                COLLECTED THIS MONTH — {monthName}
+              <p style={{ fontFamily: 'Inter', fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,0.75)', letterSpacing: '0.06em', marginBottom: 4 }}>
+                COLLECTED THIS MONTH — {monthName.toUpperCase()}
               </p>
               <p style={{ fontFamily: 'Inter', fontSize: 12, color: 'rgba(255,255,255,0.7)', marginBottom: 10 }}>
                 {summary.paid}/{summary.occupied} units paid
               </p>
-              <div style={{ background: 'rgba(255,255,255,0.2)', borderRadius: 999, height: 8, overflow: 'hidden' }}>
+              <div style={{ background: 'rgba(255,255,255,0.2)', borderRadius: 999, height: 6, overflow: 'hidden' }}>
                 <div style={{ width: `${summary.percentage}%`, background: 'white', height: '100%', borderRadius: 999, transition: 'width 700ms ease' }} />
               </div>
             </div>

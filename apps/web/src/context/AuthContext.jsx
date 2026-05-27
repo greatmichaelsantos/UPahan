@@ -1,10 +1,8 @@
-import React, { createContext, useContext, useState, useEffect, useRef, useCallback } from 'react';
+import React, { createContext, useContext, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../utils/api';
 
 const AuthContext = createContext(null);
-
-const INACTIVITY_TIMEOUT = 15 * 60 * 1000; // 15 minutes
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(() => {
@@ -20,7 +18,6 @@ export const AuthProvider = ({ children }) => {
     } catch { return null; }
   });
   const [loading, setLoading] = useState(false);
-  const timerRef = useRef(null);
   const navigate = useNavigate();
 
   const logout = useCallback(() => {
@@ -29,28 +26,8 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem('upahan_tenant');
     setUser(null);
     setTenantInfo(null);
-    if (timerRef.current) clearTimeout(timerRef.current);
     navigate('/select-role');
   }, [navigate]);
-
-  const resetTimer = useCallback(() => {
-    if (!user) return;
-    if (timerRef.current) clearTimeout(timerRef.current);
-    timerRef.current = setTimeout(() => {
-      logout();
-    }, INACTIVITY_TIMEOUT);
-  }, [user, logout]);
-
-  useEffect(() => {
-    if (!user) return;
-    const events = ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart', 'click'];
-    events.forEach(e => window.addEventListener(e, resetTimer, { passive: true }));
-    resetTimer();
-    return () => {
-      events.forEach(e => window.removeEventListener(e, resetTimer));
-      if (timerRef.current) clearTimeout(timerRef.current);
-    };
-  }, [user, resetTimer]);
 
   const login = async (email, password, role) => {
     setLoading(true);
@@ -74,11 +51,7 @@ export const AuthProvider = ({ children }) => {
     setLoading(true);
     try {
       const res = await api.post('/auth/register', data);
-      const { user: userData, token } = res.data.data;
-      localStorage.setItem('upahan_token', token);
-      localStorage.setItem('upahan_user', JSON.stringify(userData));
-      setUser(userData);
-      return { success: true, user: userData };
+      return { success: true, message: res.data.message };
     } catch (err) {
       return { success: false, message: err.response?.data?.message || 'Registration failed.' };
     } finally {

@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useRef, useEffect } from 'react';
+﻿import React, { useState, useCallback, useRef, useEffect } from 'react';
 import {
   View, Text, ScrollView, StyleSheet, TouchableOpacity,
   RefreshControl, ActivityIndicator, StatusBar,
@@ -43,7 +43,7 @@ function timeAgo(dateStr) {
 }
 
 export default function TenantDashboard({ navigation }) {
-  const { user, tenantInfo } = useAuth();
+  const { user, tenantInfo, refreshTenantInfo } = useAuth();
   const [monthStatus, setMonthStatus]       = useState(null);
   const [recentRequests, setRecentRequests] = useState([]);
   const [loading, setLoading]               = useState(true);
@@ -78,20 +78,18 @@ export default function TenantDashboard({ navigation }) {
 
   useFocusEffect(useCallback(() => {
     setLoading(true);
+    refreshTenantInfo();
     fetchData();
-  }, [fetchData]));
-
-  // Fetch badge count immediately on mount, then every 30 s
-  useEffect(() => {
     fetchNotifications();
+    const interval = setInterval(fetchData, 30000);
+    return () => clearInterval(interval);
+  }, []));
+
+  // Fetch notification badge count on mount
+  useEffect(() => {
     const interval = setInterval(fetchNotifications, 30000);
     return () => clearInterval(interval);
   }, []);
-
-  // Re-fetch when screen regains focus (e.g. returning from another tab)
-  useFocusEffect(useCallback(() => {
-    fetchNotifications();
-  }, [fetchNotifications]));
 
   const fetchNotifications = useCallback(async () => {
     try {
@@ -164,32 +162,26 @@ export default function TenantDashboard({ navigation }) {
 
   return (
     <SafeAreaView style={s.safe} edges={['top', 'bottom']}>
-      <StatusBar barStyle="dark-content" backgroundColor="#fff" />
+      <StatusBar barStyle="light-content" backgroundColor="#4A90D9" />
       <View style={{ flex: 1 }}>
 
         {/* App header */}
         <View style={s.appHeader}>
-          <View style={s.logoRow}>
-            <View style={s.logoCircle}>
-              <Ionicons name="home" size={14} color={COLORS.landlordPrimary} />
+          <View style={{ flex: 1 }}>
+            <View style={s.logoRow}>
+              <Ionicons name="home" size={22} color="#fff" />
+              <Text style={s.brand}>UPAHAN</Text>
             </View>
-            <Text style={s.brand}>UPAHAN</Text>
-          </View>
-          <View style={s.headerRight}>
-            <Text style={s.userName}>{user?.first_name} {user?.last_name}</Text>
-            <Text style={s.userRole}>Tenant</Text>
+            <Text style={s.brandSub}>TENANT PORTAL</Text>
           </View>
           <TouchableOpacity style={s.bellWrap} onPress={openNotifications}>
-            <Ionicons name="notifications-outline" size={22} color={COLORS.textPrimary} />
+            <Ionicons name="notifications-outline" size={22} color="#fff" />
             {unreadCount > 0 && (
               <View style={s.bellBadge}>
                 <Text style={s.bellBadgeText}>{unreadCount > 9 ? '9+' : unreadCount}</Text>
               </View>
             )}
           </TouchableOpacity>
-          <View style={s.avatar}>
-            <Text style={s.avatarText}>{initials}</Text>
-          </View>
         </View>
 
         <ScrollView
@@ -209,13 +201,15 @@ export default function TenantDashboard({ navigation }) {
             <>
               {/* Rent Card */}
               <View style={s.rentCard}>
-                <Text style={s.rentLabel}>MONTHLY RENT</Text>
+                <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <Text style={s.rentLabel}>MONTHLY RENT</Text>
+                  <StatusBadge status={payStatus} />
+                </View>
                 <Text style={s.rentAmount}>{formatPeso(tenantInfo?.monthly_price || 0)}</Text>
                 <View style={s.rentRow}>
                   <Text style={s.rentUnit}>
                     {tenantInfo?.unit_code ? `Unit ${tenantInfo.unit_code}` : 'No unit assigned'}
                   </Text>
-                  <StatusBadge status={payStatus} />
                 </View>
                 {hasPending ? (
                   <View style={s.pendingNotice}>
@@ -225,7 +219,7 @@ export default function TenantDashboard({ navigation }) {
                 ) : canSubmit ? (
                   <TouchableOpacity
                     style={s.payBtn}
-                    onPress={() => navigation.navigate('Payments', { screen: 'TenantPaymentDeclare' })}
+                    onPress={() => navigation.navigate('TenantPaymentDeclare')}
                   >
                     <Ionicons name="card-outline" size={18} color="#fff" />
                     <Text style={s.payBtnText}>SUBMIT PAYMENT</Text>
@@ -233,7 +227,7 @@ export default function TenantDashboard({ navigation }) {
                 ) : payStatus === 'paid' ? (
                   <TouchableOpacity
                     style={s.payBtn}
-                    onPress={() => navigation.navigate('Payments', { screen: 'TenantPaymentDeclare', params: { initialType: 'advance' } })}
+                    onPress={() => navigation.navigate('TenantPaymentDeclare', { initialType: 'advance' })}
                   >
                     <Ionicons name="card-outline" size={18} color="#fff" />
                     <Text style={s.payBtnText}>PAY IN ADVANCE</Text>
@@ -244,22 +238,29 @@ export default function TenantDashboard({ navigation }) {
               {/* Quick Actions */}
               <View style={s.actionsGrid}>
                 <TouchableOpacity
-                  style={[s.actionCard, { backgroundColor: TEAL }]}
+                  style={s.actionCard}
                   onPress={() => navigation.navigate('Payments')}
                   activeOpacity={0.85}
                 >
-                  <Ionicons name="card-outline" size={24} color="#fff" />
-                  <Text style={[s.actionLabel, { color: '#fff' }]}>PAYMENT{'\n'}HISTORY</Text>
+                  <View style={s.actionIconBlue}>
+                    <Ionicons name="card-outline" size={26} color={COLORS.tenantPrimary} />
+                  </View>
+                  <Text style={s.actionLabel}>PAYMENT{'\n'}HISTORY</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
-                  style={[s.actionCard, { backgroundColor: COLORS.infoBannerBg }]}
-                  onPress={() => navigation.navigate('Request', { screen: 'TenantMaintenanceRequest' })}
+                  style={s.actionCard}
+                  onPress={() => navigation.navigate('TenantMaintenanceRequest')}
                   activeOpacity={0.85}
                 >
-                  <Ionicons name="construct-outline" size={24} color={GOLD} />
-                  <Text style={[s.actionLabel, { color: GOLD }]}>REQUEST{'\n'}MAINTENANCE</Text>
+                  <View style={s.actionIconAmber}>
+                    <Ionicons name="construct" size={24} color="#E67E22" />
+                  </View>
+                  <Text style={s.actionLabel}>REQUEST{'\n'}MAINTENANCE</Text>
                 </TouchableOpacity>
               </View>
+
+              {/* Calendar */}
+              <CalendarWidget />
 
               {/* My Unit */}
               {tenantInfo?.unit_code && (
@@ -272,6 +273,11 @@ export default function TenantDashboard({ navigation }) {
                     {tenantInfo.lease_start_date && <InfoRow label="Lease Start" value={formatDate(tenantInfo.lease_start_date, 'medium')} />}
                     {tenantInfo.lease_end_date   && <InfoRow label="Lease End"   value={formatDate(tenantInfo.lease_end_date,   'medium')} />}
                   </View>
+                  <Text style={s.secLabel}>LANDLORD</Text>
+                  <View style={s.card}>
+                    <InfoRow label="Name"    value={tenantInfo.landlord_name  || 'Not provided'} />
+                    <InfoRow label="Contact" value={tenantInfo.landlord_phone || 'Not provided'} />
+                  </View>
                 </>
               )}
 
@@ -279,7 +285,7 @@ export default function TenantDashboard({ navigation }) {
               <Text style={s.secLabel}>MY DOCUMENTS</Text>
               <TouchableOpacity
                 style={s.card}
-                onPress={() => navigation.navigate('Profile', { screen: 'TenantDocuments' })}
+                onPress={() => navigation.navigate('TenantDocuments')}
                 activeOpacity={0.85}
               >
                 <View style={s.docRow}>
@@ -314,9 +320,6 @@ export default function TenantDashboard({ navigation }) {
                   ))}
                 </View>
               )}
-
-              {/* Calendar */}
-              <CalendarWidget />
             </>
           )}
         </ScrollView>
@@ -408,48 +411,35 @@ function InfoRow({ label, value }) {
 }
 
 function CalendarWidget() {
-  const today = new Date();
-  const [current, setCurrent] = useState(new Date(today.getFullYear(), today.getMonth(), 1));
-
-  const year        = current.getFullYear();
-  const month       = current.getMonth();
-  const firstDay    = new Date(year, month, 1).getDay();
-  const daysInMonth = new Date(year, month + 1, 0).getDate();
-  const monthName   = current.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
-
-  const cells = [];
-  for (let i = 0; i < firstDay; i++) cells.push(null);
-  for (let d = 1; d <= daysInMonth; d++) cells.push(d);
-
-  const isToday = d =>
-    d === today.getDate() && month === today.getMonth() && year === today.getFullYear();
+  const today    = new Date();
+  const monthName = today.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+  const weekStart = new Date(today);
+  weekStart.setDate(today.getDate() - today.getDay());
+  const weekDays  = Array.from({ length: 7 }, (_, i) => {
+    const d = new Date(weekStart);
+    d.setDate(weekStart.getDate() + i);
+    return d;
+  });
 
   return (
     <View style={cal.wrap}>
-      <View style={cal.header}>
-        <TouchableOpacity onPress={() => setCurrent(new Date(year, month - 1, 1))}>
-          <Ionicons name="chevron-back" size={20} color={COLORS.tenantPrimary} />
-        </TouchableOpacity>
-        <Text style={cal.monthText}>{monthName}</Text>
-        <TouchableOpacity onPress={() => setCurrent(new Date(year, month + 1, 1))}>
-          <Ionicons name="chevron-forward" size={20} color={COLORS.tenantPrimary} />
-        </TouchableOpacity>
-      </View>
+      <Text style={cal.monthText}>{monthName}</Text>
       <View style={cal.dayLabels}>
         {['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'].map(d => (
           <Text key={d} style={cal.dayLabel}>{d}</Text>
         ))}
       </View>
       <View style={cal.grid}>
-        {cells.map((d, i) => (
-          <View key={i} style={cal.cell}>
-            {d ? (
-              <View style={[cal.dayCircle, isToday(d) && cal.todayCircle]}>
-                <Text style={[cal.day, isToday(d) && cal.todayDay]}>{d}</Text>
+        {weekDays.map((d, i) => {
+          const isToday = d.toDateString() === today.toDateString();
+          return (
+            <View key={i} style={cal.cell}>
+              <View style={[cal.dayCircle, isToday && cal.todayCircle]}>
+                <Text style={[cal.day, isToday && cal.todayDay]}>{d.getDate()}</Text>
               </View>
-            ) : null}
-          </View>
-        ))}
+            </View>
+          );
+        })}
       </View>
     </View>
   );
@@ -460,12 +450,11 @@ const cal = StyleSheet.create({
     backgroundColor: '#fff', borderRadius: 16, padding: 16, marginBottom: 24,
     shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.06, shadowRadius: 8, elevation: 3,
   },
-  header:     { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 },
-  monthText:  { fontSize: 14, fontWeight: '700', color: COLORS.textPrimary },
-  dayLabels:  { flexDirection: 'row', marginBottom: 6 },
+  monthText:  { fontSize: 15, fontWeight: '700', color: COLORS.tenantPrimary, textAlign: 'center', marginBottom: 12 },
+  dayLabels:  { flexDirection: 'row', marginBottom: 4 },
   dayLabel:   { flex: 1, textAlign: 'center', fontSize: 11, fontWeight: '700', color: COLORS.textMuted },
-  grid:       { flexDirection: 'row', flexWrap: 'wrap' },
-  cell:       { width: `${100 / 7}%`, alignItems: 'center', paddingVertical: 3 },
+  grid:       { flexDirection: 'row' },
+  cell:       { flex: 1, alignItems: 'center', paddingVertical: 4 },
   dayCircle:  { width: 30, height: 30, borderRadius: 15, alignItems: 'center', justifyContent: 'center' },
   todayCircle:{ backgroundColor: COLORS.tenantPrimary },
   day:        { fontSize: 13, color: COLORS.textPrimary },
@@ -476,15 +465,11 @@ const s = StyleSheet.create({
   safe: { flex: 1, backgroundColor: COLORS.pageBg },
   appHeader: {
     flexDirection: 'row', alignItems: 'center', gap: 10,
-    backgroundColor: '#fff', paddingHorizontal: 20, paddingVertical: 12,
-    borderBottomWidth: 1, borderBottomColor: COLORS.borderLight,
+    backgroundColor: '#4A90D9', paddingHorizontal: 20, paddingVertical: 14,
   },
-  logoRow:    { flexDirection: 'row', alignItems: 'center', gap: 8, flex: 1 },
-  logoCircle: { width: 32, height: 32, borderRadius: 8, backgroundColor: COLORS.landlordLight, alignItems: 'center', justifyContent: 'center' },
-  brand:      { fontSize: 14, fontWeight: '800', color: COLORS.landlordPrimary, letterSpacing: 2 },
-  headerRight:{ alignItems: 'flex-end' },
-  userName:   { fontSize: 13, fontWeight: '700', color: COLORS.textPrimary },
-  userRole:   { fontSize: 11, color: COLORS.textSecondary },
+  logoRow:  { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  brand:    { fontSize: 20, fontWeight: '700', color: '#fff', letterSpacing: 0.4 },
+  brandSub: { fontSize: 10, color: 'rgba(255,255,255,0.7)', letterSpacing: 1, marginTop: 3 },
   bellWrap:   { position: 'relative', width: 36, height: 36, alignItems: 'center', justifyContent: 'center' },
   bellBadge: {
     position: 'absolute', top: 2, right: 2,
@@ -501,7 +486,7 @@ const s = StyleSheet.create({
     shadowOpacity: 0.3, shadowRadius: 12, elevation: 6,
   },
   rentLabel:  { fontSize: 11, fontWeight: '700', color: 'rgba(255,255,255,0.7)', letterSpacing: 1.5, marginBottom: 6 },
-  rentAmount: { fontSize: 36, fontWeight: '800', fontFamily: 'serif', color: '#fff', marginBottom: 10 },
+  rentAmount: { fontSize: 36, fontFamily: 'Inter_800ExtraBold', color: '#fff', marginBottom: 10 },
   rentRow:    { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 },
   rentUnit:   { fontSize: 13, color: 'rgba(255,255,255,0.75)' },
   pendingNotice: {
@@ -517,10 +502,13 @@ const s = StyleSheet.create({
   payBtnText:  { color: '#fff', fontWeight: '700', fontSize: 14, letterSpacing: 0.5 },
   actionsGrid: { flexDirection: 'row', gap: 12, marginBottom: 16 },
   actionCard: {
-    flex: 1, borderRadius: 16, padding: 16, alignItems: 'center', gap: 8,
-    shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.06, shadowRadius: 8, elevation: 2,
+    flex: 1, backgroundColor: '#fff', borderRadius: 12, padding: 16, alignItems: 'center', gap: 8,
+    shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.06, shadowRadius: 6, elevation: 3,
   },
-  actionLabel: { fontSize: 11, fontWeight: '700', textAlign: 'center', letterSpacing: 0.3 },
+  actionIconGold:  { width: 48, height: 48, borderRadius: 24, backgroundColor: '#FDF6E3', alignItems: 'center', justifyContent: 'center' },
+  actionIconBlue:  { width: 48, height: 48, borderRadius: 24, backgroundColor: '#E3F0FB', alignItems: 'center', justifyContent: 'center' },
+  actionIconAmber: { width: 48, height: 48, borderRadius: 24, backgroundColor: '#FFF3E0', alignItems: 'center', justifyContent: 'center' },
+  actionLabel: { fontSize: 12, fontWeight: '700', color: COLORS.textPrimary, textAlign: 'center', letterSpacing: 0.5 },
   secLabel: { fontSize: 11, fontWeight: '700', color: GOLD, letterSpacing: 1.5, marginBottom: 10, marginTop: 4 },
   card: {
     backgroundColor: '#fff', borderRadius: 16, padding: 16, marginBottom: 16,

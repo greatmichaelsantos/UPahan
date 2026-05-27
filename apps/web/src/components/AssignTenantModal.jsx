@@ -102,9 +102,6 @@ export default function AssignTenantModal({ unit, onClose, onSuccess }) {
         {/* Header */}
         <div style={{ background: '#2E7D72', borderRadius: '16px 16px 0 0', padding: '20px 20px 18px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <div>
-            <p style={{ fontFamily: 'Inter', fontWeight: 700, fontSize: 11, color: '#C9A84C', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 4 }}>
-              INVENTORY
-            </p>
             <h2 style={{ fontFamily: 'Inter', fontWeight: 700, fontSize: 22, color: 'white' }}>
               Assign Tenant
             </h2>

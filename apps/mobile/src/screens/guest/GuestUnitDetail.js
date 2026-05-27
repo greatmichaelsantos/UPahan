@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import {
   View, Text, StyleSheet, ScrollView, TouchableOpacity,
   Image, ActivityIndicator, StatusBar, Linking
@@ -197,12 +197,12 @@ const s = StyleSheet.create({
     backgroundColor: 'rgba(255,255,255,0.92)', borderRadius: 999, paddingHorizontal: 12, paddingVertical: 6,
     flexDirection: 'row', alignItems: 'baseline', gap: 2,
   },
-  priceOverlayAmount: { fontSize: 18, fontWeight: '700', fontFamily: 'serif', color: TEAL },
+  priceOverlayAmount: { fontSize: 18, fontWeight: '700', fontFamily: 'Inter_700Bold', color: TEAL },
   priceOverlayMo:     { fontSize: 12, color: COLORS.textSecondary },
   thumbGrid: { flexDirection: 'row', gap: 2 },
   thumbImg:  { width: '100%', height: 100 },
   content:   { padding: 20, gap: 16 },
-  unitTitle: { fontSize: 28, fontWeight: '700', fontFamily: 'serif', color: COLORS.textPrimary, marginBottom: 8 },
+  unitTitle: { fontSize: 28, fontWeight: '700', fontFamily: 'Inter_700Bold', color: COLORS.textPrimary, marginBottom: 8 },
   locationRow:{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 8 },
   location:   { fontSize: 13, color: COLORS.textSecondary },
   card: {
@@ -219,7 +219,7 @@ const s = StyleSheet.create({
     backgroundColor: COLORS.landlordLight, borderRadius: 999, paddingHorizontal: 12, paddingVertical: 6,
   },
   featureText:  { fontSize: 12, fontWeight: '600', color: TEAL },
-  contactTitle: { fontSize: 20, fontWeight: '700', fontFamily: 'serif', color: COLORS.textPrimary, marginBottom: 16 },
+  contactTitle: { fontSize: 20, fontWeight: '700', fontFamily: 'Inter_700Bold', color: COLORS.textPrimary, marginBottom: 16 },
   ownerRow:    { flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 16 },
   ownerAvatar: { width: 48, height: 48, borderRadius: 24, backgroundColor: COLORS.landlordLight, alignItems: 'center', justifyContent: 'center' },
   ownerAvatarText: { fontSize: 20, fontWeight: '700', color: TEAL },

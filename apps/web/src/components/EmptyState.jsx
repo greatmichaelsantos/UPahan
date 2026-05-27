@@ -1,15 +1,15 @@
 import React from 'react';
 
-export default function EmptyState({ icon: Icon, title, message, action }) {
+export default function EmptyState({ icon: Icon, title, message, action, iconColor = '#2E7D72', iconBg = '#E8F5F3' }) {
   return (
     <div className="flex flex-col items-center justify-center py-16 px-6 text-center">
       {Icon && (
         <div style={{
           width: 72, height: 72, borderRadius: '50%',
-          background: '#E8F5F3', display: 'flex', alignItems: 'center', justifyContent: 'center',
+          background: iconBg, display: 'flex', alignItems: 'center', justifyContent: 'center',
           marginBottom: 16,
         }}>
-          <Icon size={36} style={{ color: '#2E7D72' }} aria-hidden="true" />
+          <Icon size={36} style={{ color: iconColor }} aria-hidden="true" />
         </div>
       )}
       <h3 style={{

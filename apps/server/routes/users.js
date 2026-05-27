@@ -40,7 +40,7 @@ router.get('/unassigned-tenants', verifyToken, requireRole('admin'), async (req,
 router.get('/me', verifyToken, async (req, res) => {
   try {
     const result = await pool.query(
-      'SELECT user_id, first_name, last_name, email, phone_number, role, profile_photo, created_at FROM users WHERE user_id = $1',
+      'SELECT user_id, first_name, last_name, email, phone_number, role, profile_photo, date_of_birth, created_at FROM users WHERE user_id = $1',
       [req.user.userId]
     );
     if (result.rows.length === 0) return res.status(404).json({ success: false, message: 'User not found.' });
@@ -50,9 +50,9 @@ router.get('/me', verifyToken, async (req, res) => {
   }
 });
 
-// Update own profile (name, phone)
+// Update own profile (name, phone, date_of_birth)
 router.put('/me', verifyToken, async (req, res) => {
-  const { first_name, last_name, phone_number } = req.body;
+  const { first_name, last_name, phone_number, date_of_birth } = req.body;
   if (!first_name?.trim() || !last_name?.trim()) {
     return res.status(400).json({ success: false, message: 'First and last name are required.' });
   }
@@ -61,11 +61,15 @@ router.put('/me', verifyToken, async (req, res) => {
       return res.status(400).json({ success: false, message: 'Phone number must be 11 digits starting with 09.' });
     }
   }
+  const dob = date_of_birth ? new Date(date_of_birth) : null;
+  if (date_of_birth && (!dob || isNaN(dob.getTime()))) {
+    return res.status(400).json({ success: false, message: 'Invalid date of birth.' });
+  }
   try {
     const result = await pool.query(
-      `UPDATE users SET first_name=$1, last_name=$2, phone_number=$3 WHERE user_id=$4
-       RETURNING user_id, first_name, last_name, email, phone_number, role, profile_photo`,
-      [first_name.trim(), last_name.trim(), phone_number || null, req.user.userId]
+      `UPDATE users SET first_name=$1, last_name=$2, phone_number=$3, date_of_birth=$4 WHERE user_id=$5
+       RETURNING user_id, first_name, last_name, email, phone_number, role, profile_photo, date_of_birth`,
+      [first_name.trim(), last_name.trim(), phone_number || null, dob || null, req.user.userId]
     );
     res.json({ success: true, data: result.rows[0] });
   } catch {

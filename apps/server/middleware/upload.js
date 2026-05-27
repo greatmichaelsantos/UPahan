@@ -1,18 +1,8 @@
 const multer = require('multer');
 const path = require('path');
-const fs = require('fs');
 
-const createStorage = (subDir) => multer.diskStorage({
-  destination: (req, file, cb) => {
-    const dir = path.join(__dirname, '..', 'uploads', subDir);
-    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
-    cb(null, dir);
-  },
-  filename: (req, file, cb) => {
-    const ext = path.extname(file.originalname).toLowerCase();
-    cb(null, `${Date.now()}-${Math.round(Math.random() * 1e9)}${ext}`);
-  }
-});
+// All files go into memory — controllers stream them to Supabase Storage
+const memStorage = multer.memoryStorage();
 
 const imageFilter = (req, file, cb) => {
   const allowed = /jpeg|jpg|png|gif|webp/;
@@ -46,26 +36,26 @@ const imageOnlyFilter = (req, file, cb) => {
 };
 
 const unitPhotoUpload = multer({
-  storage: createStorage('units'),
+  storage: memStorage,
   limits: { fileSize: 5 * 1024 * 1024 },
   fileFilter: imageFilter,
 });
 
 const maintenancePhotoUpload = multer({
-  storage: createStorage('maintenance'),
+  storage: memStorage,
   limits: { fileSize: 5 * 1024 * 1024 },
   fileFilter: imageFilter,
 });
 
 const paymentProofUpload = multer({
-  storage: createStorage('payments'),
+  storage: memStorage,
   limits: { fileSize: 5 * 1024 * 1024 },
   fileFilter: docFilter,
 });
 
 // ID front + back (both fields, 5 MB each, JPG/PNG only)
 const documentIdUpload = multer({
-  storage: createStorage('documents'),
+  storage: memStorage,
   limits: { fileSize: 5 * 1024 * 1024 },
   fileFilter: imageOnlyFilter,
 }).fields([
@@ -75,14 +65,14 @@ const documentIdUpload = multer({
 
 // Contract (single file, 5 MB, JPG/PNG/PDF)
 const contractUpload = multer({
-  storage: createStorage('documents'),
+  storage: memStorage,
   limits: { fileSize: 5 * 1024 * 1024 },
   fileFilter: docFilter,
 }).single('contractFile');
 
 // Profile avatar (single image, 2 MB)
 const avatarUpload = multer({
-  storage: createStorage('avatars'),
+  storage: memStorage,
   limits: { fileSize: 2 * 1024 * 1024 },
   fileFilter: imageFilter,
 }).single('avatar');

@@ -18,7 +18,7 @@ const CONFIGS = {
   high:              { bg: COLORS.unpaidBg,      text: COLORS.unpaidText,     label: 'HIGH' },
   medium:            { bg: COLORS.pendingBg,     text: COLORS.pendingText,    label: 'MEDIUM' },
   low:               { bg: COLORS.lowBg,         text: COLORS.lowText,        label: 'LOW' },
-  rejected:          { bg: COLORS.unpaidBg,      text: COLORS.unpaidText,     label: 'REJECTED' },
+  rejected:          { bg: COLORS.unpaidBg,      text: COLORS.unpaidText,     label: 'NOT VERIFIED' },
   verified:          { bg: COLORS.paidBg,        text: COLORS.paidText,       label: 'VERIFIED' },
   under_review:      { bg: COLORS.pendingBg,     text: COLORS.pendingText,    label: 'UNDER REVIEW' },
 };

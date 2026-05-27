@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+﻿import React, { useState, useCallback } from 'react';
 import {
   View, Text, SectionList, StyleSheet, TouchableOpacity,
   RefreshControl, StatusBar
@@ -87,13 +87,6 @@ export default function TenantPaymentHistory({ navigation }) {
 
       <View style={s.header}>
         <Text style={s.pageTitle}>Payments</Text>
-        <TouchableOpacity
-          style={s.declareBtn}
-          onPress={() => navigation.navigate('TenantPaymentDeclare')}
-        >
-          <Ionicons name="add" size={16} color={BLUE} />
-          <Text style={s.declareBtnText}>DECLARE</Text>
-        </TouchableOpacity>
       </View>
 
       <SectionList
@@ -114,7 +107,7 @@ export default function TenantPaymentHistory({ navigation }) {
             <View style={s.summaryCard}>
               <View style={s.summaryCol}>
                 <Text style={s.summaryLabel}>PAID</Text>
-                <Text style={[s.summaryAmount, { color: TEAL }]}>{formatPeso(summary.totalPaid)}</Text>
+                <Text style={[s.summaryAmount, { color: BLUE }]}>{formatPeso(summary.totalPaid)}</Text>
               </View>
               <View style={s.summaryDivider} />
               <View style={[s.summaryCol, { paddingLeft: 16 }]}>
@@ -122,6 +115,16 @@ export default function TenantPaymentHistory({ navigation }) {
                 <Text style={[s.summaryAmount, { color: ORANGE }]}>{formatPeso(summary.totalPending)}</Text>
               </View>
             </View>
+
+            {/* Declare button */}
+            <TouchableOpacity
+              style={s.newDeclareBtn}
+              onPress={() => navigation.navigate('TenantPaymentDeclare')}
+              activeOpacity={0.85}
+            >
+              <Ionicons name="add" size={18} color="#fff" />
+              <Text style={s.newDeclareBtnText}>DECLARE PAYMENT</Text>
+            </TouchableOpacity>
 
             {/* Tabs */}
             <View style={s.tabRow}>
@@ -150,7 +153,8 @@ export default function TenantPaymentHistory({ navigation }) {
             icon="card-outline"
             title={activeTab === 'history' ? 'No Payments Recorded' : 'No Declarations Yet'}
             message={activeTab === 'history' ? 'Your verified payment history will appear here.' : 'Declarations you submit will appear here.'}
-            color={BLUE}
+            iconColor={BLUE}
+            iconBg="#EBF4FF"
           />
         }
         ListFooterComponent={
@@ -191,7 +195,7 @@ export default function TenantPaymentHistory({ navigation }) {
                 )}
                 {item.rejection_reason && (
                   <View style={s.rejectNote}>
-                    <Text style={s.rejectText}>Rejected: {item.rejection_reason}</Text>
+                    <Text style={s.rejectText}>Not Verified: {item.rejection_reason}</Text>
                   </View>
                 )}
               </View>
@@ -250,13 +254,12 @@ const s = StyleSheet.create({
     backgroundColor: '#fff', paddingHorizontal: 20, paddingVertical: 14,
     borderBottomWidth: 1, borderBottomColor: COLORS.borderLight,
   },
-  pageTitle: { flex: 1, fontSize: 26, fontWeight: '700', fontFamily: 'serif', color: COLORS.textPrimary },
-  declareBtn: {
-    flexDirection: 'row', alignItems: 'center', gap: 4,
-    paddingHorizontal: 14, paddingVertical: 8,
-    borderRadius: 999, borderWidth: 1.5, borderColor: BLUE,
+  pageTitle: { flex: 1, fontSize: 26, fontWeight: '700', fontFamily: 'Inter_700Bold', color: COLORS.textPrimary },
+  newDeclareBtn: {
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8,
+    height: 52, borderRadius: 8, backgroundColor: BLUE,
   },
-  declareBtnText: { fontSize: 12, fontWeight: '700', color: BLUE, letterSpacing: 0.5 },
+  newDeclareBtnText: { fontSize: 14, fontWeight: '600', color: '#fff', fontFamily: 'Inter_700Bold' },
   summaryCard: {
     backgroundColor: '#fff', borderRadius: 16, padding: 16,
     flexDirection: 'row', alignItems: 'center',
@@ -265,7 +268,7 @@ const s = StyleSheet.create({
   summaryCol:    { flex: 1 },
   summaryDivider:{ width: 1.5, height: 40, backgroundColor: GOLD, marginHorizontal: 16 },
   summaryLabel:  { fontSize: 11, fontWeight: '700', color: GOLD, letterSpacing: 1, marginBottom: 6, textTransform: 'uppercase' },
-  summaryAmount: { fontSize: 22, fontWeight: '700', fontFamily: 'serif' },
+  summaryAmount: { fontSize: 22, fontWeight: '700', fontFamily: 'Inter_700Bold' },
   tabRow: { flexDirection: 'row', gap: 8 },
   tab: {
     flex: 1, height: 40, borderRadius: 999,
@@ -284,7 +287,7 @@ const s = StyleSheet.create({
     flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
     marginBottom: 8, marginTop: 4, paddingHorizontal: 2,
   },
-  monthTitle: { fontSize: 16, fontWeight: '700', fontFamily: 'serif', color: COLORS.textPrimary },
+  monthTitle: { fontSize: 16, fontWeight: '700', fontFamily: 'Inter_700Bold', color: COLORS.textPrimary },
   payCard: {
     backgroundColor: '#fff', borderRadius: 16, padding: 14, marginBottom: 10,
     borderLeftWidth: 4,

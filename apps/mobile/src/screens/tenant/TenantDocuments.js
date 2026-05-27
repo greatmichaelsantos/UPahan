@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+﻿import React, { useState, useCallback } from 'react';
 import {
   View, Text, StyleSheet, ScrollView, TouchableOpacity,
   Alert, ActivityIndicator, RefreshControl, Linking, StatusBar
@@ -261,7 +261,7 @@ const s = StyleSheet.create({
   },
   backBtn:  { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 8 },
   backText: { fontSize: 13, color: BLUE, fontWeight: '500' },
-  pageTitle:{ fontSize: 26, fontWeight: '700', fontFamily: 'serif', color: COLORS.textPrimary },
+  pageTitle:{ fontSize: 26, fontWeight: '700', fontFamily: 'Inter_700Bold', color: COLORS.textPrimary },
   pageSub:  { fontSize: 13, color: COLORS.textSecondary, marginTop: 4 },
   scroll:   { padding: 20, paddingBottom: 40 },
   sectionLabel: {

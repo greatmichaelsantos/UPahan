@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useRef } from 'react';
+﻿import React, { useState, useCallback, useRef } from 'react';
 import {
   View, Text, FlatList, StyleSheet, TouchableOpacity,
   RefreshControl, Alert, StatusBar
@@ -128,7 +128,11 @@ export default function AdminMaintenanceList({ navigation }) {
           const priorityColor = PRIORITY_COLORS[item.priority_level] || COLORS.textMuted;
           const isResolving   = resolving === item.request_id;
           return (
-            <View style={s.card}>
+            <TouchableOpacity
+              style={s.card}
+              onPress={() => navigation.navigate('AdminMaintenanceDetail', { requestId: item.request_id })}
+              activeOpacity={0.85}
+            >
               <View style={[s.priorityBar, { backgroundColor: priorityColor }]} />
               <View style={s.cardBody}>
                 {/* Top row: unit badge + priority badge + status */}
@@ -189,7 +193,7 @@ export default function AdminMaintenanceList({ navigation }) {
                   </TouchableOpacity>
                 )}
               </View>
-            </View>
+            </TouchableOpacity>
           );
         }}
       />
@@ -204,7 +208,7 @@ const s = StyleSheet.create({
     backgroundColor: TEAL, paddingHorizontal: 20, paddingTop: 20, paddingBottom: 24,
   },
   headerLabel: { fontSize: 11, fontWeight: '700', color: GOLD, letterSpacing: 1.5, marginBottom: 4 },
-  headerTitle: { fontSize: 28, fontWeight: '700', fontFamily: 'serif', color: '#fff' },
+  headerTitle: { fontSize: 28, fontWeight: '700', fontFamily: 'Inter_700Bold', color: '#fff' },
   countBadge: {
     backgroundColor: 'rgba(255,255,255,0.2)',
     width: 36, height: 36, borderRadius: 18,

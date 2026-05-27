@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import {
   View, Text, TouchableOpacity, StyleSheet, ScrollView,
   ActivityIndicator, StatusBar, KeyboardAvoidingView, Platform, TextInput
@@ -41,10 +41,10 @@ export default function LoginScreen({ route, navigation }) {
         >
           {/* Logo */}
           <View style={s.logoRow}>
-            <View style={s.logoBox}>
-              <Ionicons name="home" size={16} color={COLORS.landlordPrimary} />
+            <View style={[s.logoBox, { backgroundColor: isAdmin ? COLORS.landlordLight : '#E3F0FB' }]}>
+              <Ionicons name="home" size={16} color={primary} />
             </View>
-            <Text style={s.logoText}>UPAHAN</Text>
+            <Text style={[s.logoText, { color: primary }]}>UPAHAN</Text>
           </View>
 
           {/* Role badge */}
@@ -65,6 +65,7 @@ export default function LoginScreen({ route, navigation }) {
           ) : null}
 
           {/* Email input */}
+          <Text style={s.label}>Email</Text>
           <View style={s.inputRow}>
             <Ionicons name="mail-outline" size={18} color="#888" style={s.inputIcon} />
             <TextInput
@@ -79,6 +80,7 @@ export default function LoginScreen({ route, navigation }) {
           </View>
 
           {/* Password input */}
+          <Text style={s.label}>Password</Text>
           <View style={s.inputRow}>
             <Ionicons name="lock-closed-outline" size={18} color="#888" style={s.inputIcon} />
             <TextInput
@@ -95,7 +97,7 @@ export default function LoginScreen({ route, navigation }) {
           </View>
 
           {/* Forgot */}
-          <TouchableOpacity style={s.forgotRow}>
+          <TouchableOpacity style={s.forgotRow} onPress={() => navigation.navigate('ForgotPassword', { role })}>
             <Text style={[s.forgotText, { color: primary }]}>Forgot password?</Text>
           </TouchableOpacity>
 
@@ -116,12 +118,12 @@ export default function LoginScreen({ route, navigation }) {
             <Text style={s.linkGray}>New to UPahan?  </Text>
             <Text style={[s.linkColored, { color: primary }]}>SIGN UP</Text>
           </TouchableOpacity>
-
-          <TouchableOpacity style={s.linkRow} onPress={() => navigation.navigate('RoleSelect')}>
-            <Text style={[s.linkColored, { color: primary }]}>← Back to Role Select</Text>
-          </TouchableOpacity>
         </ScrollView>
       </KeyboardAvoidingView>
+
+      <TouchableOpacity style={s.backRoleBtn} onPress={() => navigation.navigate('RoleSelect')}>
+        <Text style={[s.backRoleText, { color: primary }]}>← Back to Role Select</Text>
+      </TouchableOpacity>
     </SafeAreaView>
   );
 }
@@ -133,7 +135,7 @@ const s = StyleSheet.create({
   logoText:   { fontSize: 16, fontWeight: '800', color: COLORS.landlordPrimary, letterSpacing: 2 },
   badge:      { borderRadius: 999, paddingHorizontal: 16, paddingVertical: 7, marginBottom: 20 },
   badgeText:  { fontSize: 11, fontWeight: '700', color: '#fff', letterSpacing: 1.5 },
-  heading:    { fontSize: 32, fontWeight: '700', fontFamily: 'serif', color: COLORS.textPrimary, marginBottom: 10 },
+  heading:    { fontSize: 32, fontWeight: '700', fontFamily: 'Inter_700Bold', color: COLORS.textPrimary, marginBottom: 10 },
   accentLine: { width: 40, height: 2, marginBottom: 24 },
   errorBox: {
     flexDirection: 'row', alignItems: 'center', gap: 8,
@@ -141,10 +143,15 @@ const s = StyleSheet.create({
     marginBottom: 12, width: '100%',
   },
   errorText:  { flex: 1, fontSize: 13, color: COLORS.dangerPrimary },
+  label: {
+    alignSelf: 'flex-start', fontSize: 12, fontWeight: '600',
+    color: COLORS.textSecondary, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 6,
+  },
   inputRow: {
     flexDirection: 'row', alignItems: 'center',
-    backgroundColor: COLORS.inputBg, borderRadius: 12, height: 52,
-    paddingHorizontal: 14, marginBottom: 12, width: '100%',
+    backgroundColor: '#fff', borderRadius: 12, height: 52,
+    paddingHorizontal: 14, marginBottom: 16, width: '100%',
+    borderWidth: 1.5, borderColor: COLORS.borderLight,
   },
   inputIcon:  { marginRight: 10 },
   inputField: { flex: 1, fontSize: 15, color: COLORS.textPrimary },
@@ -153,7 +160,9 @@ const s = StyleSheet.create({
   forgotText: { fontSize: 13, fontWeight: '600' },
   btn:        { width: '100%', height: 52, borderRadius: 999, alignItems: 'center', justifyContent: 'center', marginBottom: 16 },
   btnText:    { color: '#fff', fontWeight: '700', fontSize: 14, letterSpacing: 2 },
-  linkRow:    { flexDirection: 'row', alignItems: 'center', marginBottom: 12 },
-  linkGray:   { fontSize: 14, color: COLORS.textSecondary },
-  linkColored:{ fontSize: 14, fontWeight: '700' },
+  linkRow:     { flexDirection: 'row', alignItems: 'center', marginBottom: 12 },
+  linkGray:    { fontSize: 14, color: COLORS.textSecondary },
+  linkColored: { fontSize: 14, fontWeight: '700' },
+  backRoleBtn: { alignItems: 'center', paddingVertical: 14, borderTopWidth: 1, borderTopColor: COLORS.borderLight, backgroundColor: COLORS.pageBg },
+  backRoleText:{ fontSize: 13, fontWeight: '600' },
 });

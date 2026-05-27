@@ -131,15 +131,19 @@ const getMyTenantInfo = async (req, res) => {
       `SELECT t.tenant_id, t.user_id, t.unit_id, t.lease_start_date, t.lease_end_date,
               u.first_name, u.last_name, u.email, u.phone_number,
               un.unit_code, un.monthly_price, un.floor_plan, un.location, un.bedrooms, un.description,
+              CONCAT(owner.first_name, ' ', owner.last_name) AS landlord_name,
+              owner.phone_number AS landlord_phone,
               ARRAY_AGG(DISTINCT m.file_path) FILTER (WHERE m.file_path IS NOT NULL) AS unit_photos
        FROM tenants t
        JOIN users u ON t.user_id = u.user_id
        JOIN units un ON t.unit_id = un.unit_id
+       LEFT JOIN users owner ON un.admin_id = owner.user_id
        LEFT JOIN media m ON m.unit_id = un.unit_id AND m.maintenance_request_id IS NULL
        WHERE t.user_id = $1 AND t.is_archived = false
        GROUP BY t.tenant_id, t.user_id, t.unit_id, t.lease_start_date, t.lease_end_date,
                 u.first_name, u.last_name, u.email, u.phone_number,
-                un.unit_code, un.monthly_price, un.floor_plan, un.location, un.bedrooms, un.description
+                un.unit_code, un.monthly_price, un.floor_plan, un.location, un.bedrooms, un.description,
+                owner.first_name, owner.last_name, owner.phone_number
        LIMIT 1`,
       [req.user.userId]
     );

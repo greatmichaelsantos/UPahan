@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import { Modal, View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS } from '../constants/colors';
@@ -36,7 +36,7 @@ const s = StyleSheet.create({
   overlay:   { flex: 1, backgroundColor: 'rgba(0,0,0,0.4)', justifyContent: 'flex-end' },
   card:      { backgroundColor: '#fff', borderRadius: 20, borderBottomLeftRadius: 0, borderBottomRightRadius: 0, padding: 24, alignItems: 'center', gap: 10 },
   iconBox:   { width: 56, height: 56, borderRadius: 28, alignItems: 'center', justifyContent: 'center', marginBottom: 4 },
-  title:     { fontSize: 20, fontWeight: '700', fontFamily: 'serif', color: '#1A1A1A', textAlign: 'center' },
+  title:     { fontSize: 20, fontWeight: '700', fontFamily: 'Inter_700Bold', color: '#1A1A1A', textAlign: 'center' },
   body:      { fontSize: 14, color: '#666666', textAlign: 'center', lineHeight: 20, marginBottom: 4 },
   btn:       { width: '100%', height: 52, borderRadius: 999, alignItems: 'center', justifyContent: 'center' },
   btnLabel:  { color: '#fff', fontWeight: '700', fontSize: 14, letterSpacing: 1 },

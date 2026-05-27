@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import {
   View, Text, FlatList, StyleSheet, TouchableOpacity,
   TextInput, Image, RefreshControl, StatusBar, ScrollView
@@ -187,7 +187,7 @@ const s = StyleSheet.create({
   backText: { fontSize: 13, color: 'rgba(255,255,255,0.7)', fontWeight: '500' },
   brandRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 8 },
   brand:    { fontSize: 15, fontWeight: '800', color: '#fff', letterSpacing: 2 },
-  heroTitle:{ fontSize: 28, fontWeight: '700', fontFamily: 'serif', color: '#fff', marginBottom: 4 },
+  heroTitle:{ fontSize: 28, fontWeight: '700', fontFamily: 'Inter_700Bold', color: '#fff', marginBottom: 4 },
   heroSub:  { fontSize: 13, color: 'rgba(255,255,255,0.7)' },
   searchBar: {
     flexDirection: 'row', alignItems: 'center',
@@ -222,7 +222,7 @@ const s = StyleSheet.create({
     backgroundColor: 'rgba(255,255,255,0.92)', borderRadius: 999, paddingHorizontal: 10, paddingVertical: 6,
     flexDirection: 'row', alignItems: 'baseline', gap: 2,
   },
-  priceOverlayAmount: { fontSize: 16, fontWeight: '700', fontFamily: 'serif', color: TEAL },
+  priceOverlayAmount: { fontSize: 16, fontWeight: '700', fontFamily: 'Inter_700Bold', color: TEAL },
   priceOverlayMo:     { fontSize: 11, color: COLORS.textSecondary },
   cardBody:    { padding: 14 },
   unitCode:    { fontSize: 16, fontWeight: '700', color: COLORS.textPrimary, marginBottom: 4 },

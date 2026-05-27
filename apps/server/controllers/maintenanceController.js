@@ -1,5 +1,5 @@
 const pool = require('../config/db');
-const path = require('path');
+const { uploadFile } = require('../utils/supabaseStorage');
 const { sendNotification, getAdminUserId } = require('./notificationsController');
 
 const getRequests = async (req, res) => {
@@ -107,9 +107,11 @@ const createRequest = async (req, res) => {
     return res.status(400).json({ success: false, message: msg });
   }
   try {
-    const maintenanceImages = JSON.stringify(
-      (req.files || []).map(f => `/uploads/maintenance/${path.basename(f.path)}`)
+    const uploadPromises = req.files.map(f =>
+      uploadFile(f.buffer, `maintenance/${Date.now()}-${f.originalname}`, f.mimetype)
     );
+    const fileUrls = await Promise.all(uploadPromises);
+    const maintenanceImages = JSON.stringify(fileUrls);
     const tenantResult = await pool.query(
       `SELECT t.tenant_id, t.unit_id, u.first_name || ' ' || u.last_name AS tenant_name, un.unit_code
        FROM tenants t
@@ -205,11 +207,15 @@ const uploadRequestPhotos = async (req, res) => {
     if (!req.files || req.files.length === 0) {
       return res.status(400).json({ success: false, message: 'No files uploaded.' });
     }
-    const insertPromises = req.files.map(file => {
-      const relativePath = `/uploads/maintenance/${path.basename(file.path)}`;
+    const insertPromises = req.files.map(async file => {
+      const url = await uploadFile(
+        file.buffer,
+        `maintenance/${Date.now()}-${file.originalname}`,
+        file.mimetype
+      );
       return pool.query(
         'INSERT INTO media (maintenance_request_id, file_path) VALUES ($1, $2) ON CONFLICT (file_path) DO NOTHING RETURNING *',
-        [id, relativePath]
+        [id, url]
       );
     });
     const results = await Promise.all(insertPromises);

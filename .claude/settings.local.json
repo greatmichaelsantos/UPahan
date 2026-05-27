@@ -3,7 +3,32 @@
     "allow": [
       "Bash(dir C:\\\\Users\\\\Adrian\\\\OneDrive\\\\Desktop\\\\UPahan *)",
       "mcp__memoryos__search_memory",
-      "mcp__memoryos__get_preferences"
+      "mcp__memoryos__get_preferences",
+      "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\Great Michael Santos\\\\Desktop\\\\UPahan-STUX-SOFTWARE_ENGINEERING\" -Recurse -Directory)",
+      "Bash(Select-Object -First 20)",
+      "Bash(Format-Table FullName)",
+      "Bash(Select-Object FullName)",
+      "Bash(npm install *)",
+      "Bash(node -e \"require\\('@expo-google-fonts/inter'\\); console.log\\('ok'\\)\")",
+      "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\Great Michael Santos\\\\Desktop\\\\UPahan-STUX-SOFTWARE_ENGINEERING\" -Directory)",
+      "Bash(Select-Object Name)",
+      "Bash(node db/migrate.js)",
+      "Bash(node -e \"require\\('dotenv'\\).config\\({ path: require\\('path'\\).join\\(__dirname, '../../.env'\\) }\\); require\\('dotenv'\\).config\\(\\); const pool = require\\('./config/db'\\); pool.query\\('UPDATE users SET is_verified = TRUE WHERE is_verified = FALSE'\\).then\\(r => { console.log\\('Updated ' + r.rowCount + ' existing users to verified'\\); process.exit\\(0\\); }\\).catch\\(e => { console.error\\(e\\); process.exit\\(1\\); }\\);\")",
+      "Bash(node db/runSchema.js)",
+      "Bash(node db/seed.js)",
+      "Bash(node fix-passwords.js)",
+      "Bash(Remove-Item *)",
+      "Bash(node test-login.js)",
+      "Bash(node test-db.js)",
+      "Bash(node -e \"require\\('dotenv'\\).config\\(\\); console.log\\(process.env.DATABASE_URL\\)\")",
+      "Bash(Get-ChildItem \"C:\\\\Users\\\\Great Michael Santos\\\\Desktop\\\\UPahan-STUX-SOFTWARE_ENGINEERING\\\\apps\\\\server\" -Filter \"*.js\")",
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)",
+      "Bash(git push *)",
+      "Bash(npm run *)",
+      "Bash(ping -n 2 google.com)",
+      "Bash(ping -n 2 db.ekoyofcrfnrkkullozbb.supabase.co)",
+      "Bash(git commit *)"
     ]
   }
 }

@@ -17,7 +17,7 @@ const configs = {
   low:              { bg: '#888888', color: '#FFFFFF',  label: 'LOW', solid: true },
   on_track:         { bg: '#E8F5F3', color: '#2E7D72',  label: 'ON TRACK' },
   pending_approval: { bg: '#FEF3EC', color: '#E07B39',  label: 'PENDING' },
-  rejected:         { bg: '#FDEEEE', color: '#D64045',  label: 'REJECTED' },
+  rejected:         { bg: '#FDEEEE', color: '#D64045',  label: 'NOT VERIFIED' },
   verified:         { bg: '#E8F5F3', color: '#2E7D72',  label: 'VERIFIED' },
   under_review:     { bg: '#FEF3EC', color: '#E07B39',  label: 'UNDER REVIEW' },
 };

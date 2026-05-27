@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useRef } from 'react';
+﻿import React, { useState, useCallback, useRef } from 'react';
 import {
   View, Text, ScrollView, StyleSheet, TouchableOpacity,
   Image, Alert, RefreshControl, ActivityIndicator, StatusBar
@@ -207,7 +207,7 @@ const s = StyleSheet.create({
     paddingHorizontal: 20, paddingTop: 20, paddingBottom: 32, backgroundColor: TEAL,
   },
   headerLabel: { fontSize: 11, fontWeight: '700', color: GOLD, letterSpacing: 1.5, marginBottom: 4 },
-  headerTitle: { fontSize: 20, fontWeight: '700', fontFamily: 'serif', color: '#fff' },
+  headerTitle: { fontSize: 20, fontWeight: '700', fontFamily: 'Inter_700Bold', color: '#fff' },
   scroll:     { paddingBottom: 40 },
   subjectCard: {
     backgroundColor: '#fff', borderRadius: 16, padding: 20,
@@ -217,7 +217,7 @@ const s = StyleSheet.create({
   priorityRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 10 },
   priorityDot: { width: 10, height: 10, borderRadius: 5 },
   priorityText:{ fontSize: 11, fontWeight: '700', letterSpacing: 0.5 },
-  subject:     { fontSize: 22, fontWeight: '700', fontFamily: 'serif', color: COLORS.textPrimary, marginBottom: 4 },
+  subject:     { fontSize: 22, fontWeight: '700', fontFamily: 'Inter_700Bold', color: COLORS.textPrimary, marginBottom: 4 },
   category:    { fontSize: 13, color: COLORS.textSecondary },
   infoGrid:    { flexDirection: 'row', gap: 10, marginHorizontal: 20, marginBottom: 10 },
   infoCard: {
