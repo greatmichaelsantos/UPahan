@@ -55,7 +55,7 @@ export default function NotificationBell({ color = '#4A4A4A' }) {
 
   useEffect(() => {
     fetchCount();
-    const interval = setInterval(fetchCount, 30000);
+    const interval = setInterval(fetchCount, 3000);
     return () => clearInterval(interval);
   }, [fetchCount]);
 

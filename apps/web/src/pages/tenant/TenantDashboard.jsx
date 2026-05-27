@@ -44,7 +44,7 @@ export default function TenantDashboard() {
       api.get('/tenants/me').then(r => setUnitDetail(r.data.data)).catch(() => {});
     };
     load(false);
-    const interval = setInterval(() => load(true), 30000);
+    const interval = setInterval(() => load(true), 3000);
     return () => clearInterval(interval);
   }, [location.key]);
 

@@ -413,7 +413,7 @@ const rejectPayment = async (req, res) => {
       if (payResult.rows.length > 0) {
         const { tenant_user_id, amount, month_covered } = payResult.rows[0];
         await sendNotification(tenant_user_id, 'payment_rejected',
-          `Your payment of ₱${parseFloat(amount).toLocaleString('en-PH', { minimumFractionDigits: 2 })} for ${month_covered} was rejected. Reason: ${rejectionReason.trim()}`,
+          `Your payment of ₱${parseFloat(amount).toLocaleString('en-PH', { minimumFractionDigits: 2 })} for ${month_covered} was not verified. Reason: ${rejectionReason.trim()}`,
           parseInt(id)
         );
       }

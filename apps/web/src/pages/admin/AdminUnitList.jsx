@@ -29,7 +29,7 @@ export default function AdminUnitList() {
 
   useEffect(() => {
     load('', false);
-    const interval = setInterval(() => load('', true), 30000);
+    const interval = setInterval(() => load('', true), 3000);
     return () => clearInterval(interval);
   }, [location.key]);
   useEffect(() => { const t = setTimeout(() => load(search), 350); return () => clearTimeout(t); }, [search]);

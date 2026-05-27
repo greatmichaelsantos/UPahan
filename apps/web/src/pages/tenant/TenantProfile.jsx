@@ -225,7 +225,7 @@ export default function TenantProfile() {
   useEffect(() => {
     fetchProfile();
     fetchDocuments();
-    const interval = setInterval(() => { fetchProfile(); fetchDocuments(); }, 30000);
+    const interval = setInterval(() => { fetchProfile(); fetchDocuments(); }, 3000);
     return () => clearInterval(interval);
   }, [fetchProfile, fetchDocuments, location.key]);
 

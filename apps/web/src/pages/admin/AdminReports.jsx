@@ -319,7 +319,7 @@ export default function AdminReports() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     fetchReport('monthly');
-    const interval = setInterval(() => fetchReport(period), 30000);
+    const interval = setInterval(() => fetchReport(period), 3000);
     return () => clearInterval(interval);
   }, []);
 

@@ -23,7 +23,7 @@ export default function TenantMaintenanceHistory() {
 
   useEffect(() => {
     load(false);
-    const interval = setInterval(() => load(true), 30000);
+    const interval = setInterval(() => load(true), 3000);
     return () => clearInterval(interval);
   }, [location.key]);
 

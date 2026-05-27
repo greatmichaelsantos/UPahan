@@ -21,7 +21,7 @@ export default function AdminDashboard() {
       api.get('/payments/pending').then(r => setPaymentPending(r.data.data?.length || 0)).catch(() => {});
     };
     fetch();
-    const interval = setInterval(fetch, 30000);
+    const interval = setInterval(fetch, 3000);
     return () => clearInterval(interval);
   }, [location.key]);
 
