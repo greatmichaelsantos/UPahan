@@ -43,7 +43,11 @@ const getPayments = async (req, res) => {
     }
 
     const result = await pool.query(query, params);
-    res.json({ success: true, data: result.rows });
+    const data = result.rows.map(p => ({
+      ...p,
+      proof_images: p.proof_images ? JSON.parse(p.proof_images) : []
+    }));
+    res.json({ success: true, data });
   } catch (err) {
     console.error('Get payments error:', err);
     res.status(500).json({ success: false, message: 'Server error.' });
