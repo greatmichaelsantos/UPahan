@@ -20,8 +20,8 @@ export default function AdminLayout({ children, title }) {
       <main className="flex-1 md:ml-[220px] min-h-screen flex flex-col pb-24 md:pb-0">
         {/* Desktop sticky header — merged green bar */}
         <header
-          className="hidden md:flex items-center justify-between sticky top-0 z-20"
-          style={{ padding: '0 32px', height: 64, background: '#277571', boxShadow: '0 2px 8px rgba(39,117,113,0.18)' }}
+          className="flex items-center justify-between sticky top-0 z-20"
+          style={{ padding: '0 16px', height: 56, background: '#277571', boxShadow: '0 2px 8px rgba(39,117,113,0.18)' }}
         >
           <div>
             {title ? (

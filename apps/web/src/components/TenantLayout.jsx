@@ -17,8 +17,8 @@ export default function TenantLayout({ children, title }) {
 
         {/* Desktop sticky header — blue bar */}
         <header
-          className="hidden md:flex items-center justify-between sticky top-0 z-20"
-          style={{ padding: '0 32px', height: 64, background: '#4A90D9', boxShadow: '0 2px 8px rgba(74,144,217,0.18)' }}
+          className="flex items-center justify-between sticky top-0 z-20"
+          style={{ padding: '0 16px', height: 56, background: '#4A90D9', boxShadow: '0 2px 8px rgba(74,144,217,0.18)' }}
         >
           <div>
             {title ? (
