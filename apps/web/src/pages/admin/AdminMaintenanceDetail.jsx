@@ -60,6 +60,7 @@ export default function AdminMaintenanceDetail() {
   if (!req) return null;
 
   return (
+    <>
     <AdminLayout title="Maintenance">
       {/* Back link */}
       <div style={{ padding: '16px 20px 0' }}>
@@ -178,7 +179,8 @@ export default function AdminMaintenanceDetail() {
         )}
       </div>
 
-      <ImageLightbox src={lightboxSrc} onClose={() => setLightboxSrc(null)} />
     </AdminLayout>
+    <ImageLightbox src={lightboxSrc} onClose={() => setLightboxSrc(null)} />
+    </>
   );
 }

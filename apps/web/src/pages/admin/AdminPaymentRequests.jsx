@@ -38,12 +38,17 @@ export default function AdminPaymentRequests() {
   const [toast, setToast]                 = useState('');
   const [lightboxSrc, setLightboxSrc]     = useState(null);
 
-  const load = useCallback((silent = false) => {
+  const load = useCallback(async (silent = false) => {
     if (!silent) setLoading(true);
-    api.get('/payments/pending')
-      .then(r => setDeclarations(r.data.data || []))
-      .catch(() => {})
-      .finally(() => { if (!silent) setLoading(false); });
+    try {
+      const r = await api.get('/payments/pending');
+      console.log('PAYMENTS RESPONSE:', r.data);
+      setDeclarations(r.data.data || []);
+    } catch (err) {
+      console.error('Failed to load payment declarations:', err);
+    } finally {
+      if (!silent) setLoading(false);
+    }
   }, []);
 
   useEffect(() => {
@@ -107,6 +112,7 @@ export default function AdminPaymentRequests() {
   };
 
   return (
+    <>
     <AdminLayout title="Payments">
       <SectionHeader label="Finance" title="Payment Requests" />
 
@@ -380,7 +386,8 @@ export default function AdminPaymentRequests() {
         </div>
       )}
 
-      <ImageLightbox src={lightboxSrc} onClose={() => setLightboxSrc(null)} />
     </AdminLayout>
+    <ImageLightbox src={lightboxSrc} onClose={() => setLightboxSrc(null)} />
+  </>
   );
 }
