@@ -80,6 +80,14 @@ function ordinal(n) {
   return n + (s[(v - 20) % 10] || s[v] || s[0]);
 }
 
+const printStyles = `
+  @media print {
+    aside, header, .no-print { display: none !important; }
+    body { background: white; }
+    * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  }
+`;
+
 export default function TenantReports() {
   const today = new Date().toISOString().split('T')[0];
   const monthStart = new Date(new Date().getFullYear(), new Date().getMonth(), 1)
@@ -91,6 +99,26 @@ export default function TenantReports() {
   const [report, setReport]       = useState(null);
   const [loading, setLoading]     = useState(false);
   const [error, setError]         = useState('');
+
+  const handleDownload = () => window.print();
+
+  const handleExportCSV = () => {
+    if (!report) return;
+    const rows = [
+      ['Amount', 'Month Covered', 'Status', 'Date', 'Late'],
+      ...report.payments.breakdown.map(p => [
+        p.amount, p.month_covered, p.status, p.date, p.is_late ? 'Yes' : 'No',
+      ]),
+    ];
+    const csv = rows.map(r => r.map(v => `"${v ?? ''}"`).join(',')).join('\n');
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `upahan-my-report-${today}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
 
   const handleGenerate = async () => {
     setError('');
@@ -112,12 +140,13 @@ export default function TenantReports() {
 
   return (
     <TenantLayout title="My Report">
+      <style>{printStyles}</style>
       <SectionHeader label="Reports" title="My Report" />
 
       <div style={{ padding: '0 16px 32px', display: 'flex', flexDirection: 'column', gap: 16 }}>
 
         {/* Period selector */}
-        <div className="card" style={{ padding: 16 }}>
+        <div className="card no-print" style={{ padding: 16 }}>
           <p style={labelStyle}>Select Period</p>
           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: period === 'custom' ? 12 : 0 }}>
             {[
@@ -163,15 +192,37 @@ export default function TenantReports() {
               </div>
             </div>
           )}
-          <button
-            onClick={handleGenerate} disabled={loading}
-            style={{
-              marginTop: 12, height: 44, borderRadius: 8, background: loading ? '#888' : BLUE,
-              color: 'white', border: 'none', fontFamily: 'Inter', fontWeight: 700, fontSize: 14,
-              padding: '0 28px', cursor: loading ? 'not-allowed' : 'pointer',
-              opacity: loading ? 0.7 : 1, transition: 'all 150ms',
-            }}
-          >{loading ? 'Generating…' : 'Generate Report'}</button>
+          <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center', marginTop: 12 }}>
+            <button
+              onClick={handleGenerate} disabled={loading}
+              style={{
+                height: 44, borderRadius: 8, background: loading ? '#888' : BLUE,
+                color: 'white', border: 'none', fontFamily: 'Inter', fontWeight: 700, fontSize: 14,
+                padding: '0 28px', cursor: loading ? 'not-allowed' : 'pointer',
+                opacity: loading ? 0.7 : 1, transition: 'all 150ms',
+              }}
+            >{loading ? 'Generating…' : 'Generate Report'}</button>
+            {report && (
+              <>
+                <button
+                  onClick={handleDownload}
+                  style={{
+                    height: 44, borderRadius: 8, background: '#4A4A4A',
+                    color: 'white', border: 'none', fontFamily: 'Inter', fontWeight: 700, fontSize: 13,
+                    padding: '0 20px', cursor: 'pointer', transition: 'all 150ms',
+                  }}
+                >⬇ Download PDF</button>
+                <button
+                  onClick={handleExportCSV}
+                  style={{
+                    height: 44, borderRadius: 8, background: 'white',
+                    color: BLUE, border: `1.5px solid ${BLUE}`, fontFamily: 'Inter', fontWeight: 700, fontSize: 13,
+                    padding: '0 20px', cursor: 'pointer', transition: 'all 150ms',
+                  }}
+                >⬇ Export CSV</button>
+              </>
+            )}
+          </div>
           {error && (
             <p style={{ fontFamily: 'Inter', fontSize: 13, color: '#D64045', marginTop: 8 }}>{error}</p>
           )}
