@@ -41,7 +41,7 @@ export default function AdminPaymentRequests() {
   const load = useCallback(async (silent = false) => {
     if (!silent) setLoading(true);
     try {
-      const r = await api.get('/payments/pending');
+      const r = await api.get('/payments');
       console.log('PAYMENTS RESPONSE:', r.data);
       setDeclarations(r.data.data || []);
     } catch (err) {
