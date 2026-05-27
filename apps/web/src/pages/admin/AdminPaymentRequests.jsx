@@ -43,7 +43,8 @@ export default function AdminPaymentRequests() {
     try {
       const r = await api.get('/payments');
       console.log('PAYMENTS RESPONSE:', r.data);
-      setDeclarations(r.data.data || []);
+      const pending = (r.data.data || []).filter(p => p.payment_status === 'pending_approval');
+      setDeclarations(pending);
     } catch (err) {
       console.error('Failed to load payment declarations:', err);
     } finally {
@@ -68,7 +69,7 @@ export default function AdminPaymentRequests() {
     try {
       await api.put(`/payments/${approveTarget.payment_id}/approve`);
       setApproveTarget(null);
-      load();
+      await load();
       showToast('Payment verified and recorded.');
     } catch (err) {
       setApproveTarget(null);
@@ -102,7 +103,7 @@ export default function AdminPaymentRequests() {
       setRejectReason('');
       setCustomReason('');
       setRejectError('');
-      load();
+      await load();
       showToast('Payment declaration rejected.');
     } catch (err) {
       setRejectError(err.response?.data?.message || 'Something went wrong.');
