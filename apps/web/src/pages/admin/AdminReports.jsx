@@ -84,6 +84,11 @@ function TableHead({ cols }) {
 }
 
 const printStyles = `
+  @page {
+    margin: 20mm 15mm;
+    size: A4;
+  }
+
   @media print {
     /* Hide everything except report content */
     nav, aside, .sidebar, header, button, .no-print,
@@ -172,9 +177,30 @@ const printStyles = `
     /* Tables */
     table {
       width: 100% !important;
+      table-layout: fixed !important;
       border-collapse: collapse !important;
       font-size: 12px !important;
       margin-top: 12px !important;
+    }
+
+    /* Payments table column widths */
+    .payments-table th:nth-child(1) { width: 8% !important; }
+    .payments-table th:nth-child(2) { width: 20% !important; }
+    .payments-table th:nth-child(3) { width: 15% !important; }
+    .payments-table th:nth-child(4) { width: 20% !important; }
+    .payments-table th:nth-child(5) { width: 15% !important; }
+
+    /* Maintenance table column widths */
+    .maintenance-table th:nth-child(1) { width: 8% !important; }
+    .maintenance-table th:nth-child(2) { width: 18% !important; }
+    .maintenance-table th:nth-child(3) { width: 18% !important; }
+    .maintenance-table th:nth-child(4) { width: 15% !important; }
+    .maintenance-table th:nth-child(5) { width: 15% !important; }
+
+    td {
+      word-wrap: break-word !important;
+      overflow-wrap: break-word !important;
+      white-space: normal !important;
     }
 
     thead tr {
@@ -312,7 +338,19 @@ export default function AdminReports() {
         {/* Print-only branded header */}
         <div className="report-header" style={{ display: 'none' }}>
           <div>
-            <div className="report-logo">🏠 UPAHAN</div>
+            <div className="report-logo" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <div style={{
+                width: 36, height: 36, borderRadius: 10,
+                background: '#277571',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+              }}>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="white">
+                  <path d="M3 9.5L12 3l9 6.5V21a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9.5z"/>
+                  <path d="M9 22V12h6v10" fill="#1D5754"/>
+                </svg>
+              </div>
+              <span>UPAHAN</span>
+            </div>
             <div style={{ fontSize: 12, color: '#666', marginTop: 4 }}>RGT Real Estate Marketing</div>
           </div>
           <div className="report-meta">
@@ -449,7 +487,7 @@ export default function AdminReports() {
                 <p style={{ fontFamily: 'Inter', fontSize: 13, color: '#888' }}>No payment data for the selected period.</p>
               ) : (
                 <div style={{ overflowX: 'auto' }}>
-                  <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
+                  <table className="payments-table" style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
                     <TableHead cols={['Unit', 'Tenant', 'Amount', 'Month Covered', 'Status']} />
                     <tbody>
                       {report.payments.breakdown.map((p, i) => (
@@ -479,7 +517,7 @@ export default function AdminReports() {
                 <p style={{ fontFamily: 'Inter', fontSize: 13, color: '#888' }}>No maintenance data for the selected period.</p>
               ) : (
                 <div style={{ overflowX: 'auto' }}>
-                  <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
+                  <table className="maintenance-table" style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
                     <TableHead cols={['Unit', 'Tenant', 'Category', 'Status', 'Date']} />
                     <tbody>
                       {report.maintenance.breakdown.map((m, i) => (
