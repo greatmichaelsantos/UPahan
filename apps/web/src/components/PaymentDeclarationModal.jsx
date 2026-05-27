@@ -52,8 +52,9 @@ export default function PaymentDeclarationModal({ unit, monthlyRent, onClose, on
   const [amountWarning, setAmountWarning] = useState('');
   const [proofFiles, setProofFiles]     = useState([]);
   const [proofPreviews, setProofPreviews] = useState([]);
-  const [proofError, setProofError]     = useState('');
-  const [submitting, setSubmitting]     = useState(false);
+  const [proofError, setProofError]         = useState('');
+  const [referenceError, setReferenceError] = useState('');
+  const [submitting, setSubmitting]         = useState(false);
   const [error, setError]               = useState('');
   const [success, setSuccess]           = useState('');
   const fileInputRef = useRef(null);
@@ -138,11 +139,16 @@ export default function PaymentDeclarationModal({ unit, monthlyRent, onClose, on
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+    setReferenceError('');
 
     if (!form.paymentMethod) { setError('Please select a payment method.'); return; }
     if (!form.amountPaid || parseFloat(form.amountPaid) <= 0) { setError('Please enter a valid amount greater than 0.'); return; }
     if (paymentType === 'partial' && parseFloat(form.amountPaid) >= parseFloat(monthlyRent)) {
       setError(`Partial payment must be less than the full rent of ${formatPeso(monthlyRent)}.`); return;
+    }
+    if (form.paymentMethod !== 'Cash' && !form.referenceNumber.trim()) {
+      setReferenceError('Reference number is required for this payment method.');
+      return;
     }
     if (proofFiles.length === 0) {
       setProofError('Please attach at least one proof of payment.');
@@ -314,13 +320,25 @@ export default function PaymentDeclarationModal({ unit, monthlyRent, onClose, on
             </div>
           </div>
 
-          {/* Reference Number — hidden for Cash */}
+          {/* Reference Number — hidden for Cash, required for all other methods */}
           {form.paymentMethod !== 'Cash' && (
             <div>
-              <label style={labelStyle}>Reference Number</label>
-              <input value={form.referenceNumber} onChange={set('referenceNumber')}
-                placeholder="Transaction / reference number (if applicable)"
-                style={baseInput} onFocus={onFocus} onBlur={onBlur} />
+              <label style={labelStyle}>Reference Number *</label>
+              <input
+                value={form.referenceNumber}
+                onChange={(e) => { set('referenceNumber')(e); setReferenceError(''); }}
+                placeholder="Transaction / reference number"
+                style={{
+                  ...baseInput,
+                  ...(referenceError ? { borderColor: '#D64045', background: '#FDEEEE' } : {}),
+                }}
+                onFocus={onFocus} onBlur={onBlur}
+              />
+              {referenceError && (
+                <p style={{ fontFamily: 'Inter', fontSize: 12, color: '#D64045', marginTop: 4 }}>
+                  {referenceError}
+                </p>
+              )}
             </div>
           )}
 
