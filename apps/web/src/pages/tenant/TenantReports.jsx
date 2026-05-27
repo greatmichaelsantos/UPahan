@@ -15,17 +15,24 @@ const labelStyle = {
 };
 
 const statCard = (label, value, accent) => (
-  <div style={{
+  <div className="stat-card" style={{
     flex: 1, background: accent ? BLUE : '#F0EEEB', borderRadius: 10,
     padding: '14px 16px', textAlign: 'center',
   }}>
-    <p style={{ ...labelStyle, color: accent ? 'rgba(255,255,255,0.7)' : GOLD }}>{label}</p>
-    <p style={{
+    <p className="stat-label" style={{ ...labelStyle, color: accent ? 'rgba(255,255,255,0.7)' : GOLD }}>{label}</p>
+    <p className="stat-value" style={{
       fontFamily: 'Inter', fontWeight: 800, fontSize: 22,
       color: accent ? '#fff' : '#4A4A4A',
     }}>{value}</p>
   </div>
 );
+
+const STATUS_PRINT_CLASS = {
+  verified: 'status-verified', paid: 'status-verified', completed: 'status-verified',
+  not_verified: 'status-not-verified', rejected: 'status-not-verified',
+  pending: 'status-pending', pending_approval: 'status-pending',
+  partial: 'status-partial', in_progress: 'status-partial',
+};
 
 function StatusPill({ status, isLate }) {
   const map = {
@@ -40,15 +47,16 @@ function StatusPill({ status, isLate }) {
     completed:        { bg: '#E8F5F3', color: '#2E7D72', label: 'COMPLETED' },
   };
   const cfg = map[status] || { bg: '#F0EEEB', color: '#888', label: status?.toUpperCase() || '—' };
+  const printClass = STATUS_PRINT_CLASS[status] || '';
   return (
     <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
-      <span style={{
+      <span className={printClass} style={{
         background: cfg.bg, color: cfg.color,
         fontFamily: 'Inter', fontWeight: 700, fontSize: 10,
         borderRadius: 4, padding: '2px 7px', letterSpacing: '0.06em',
       }}>{cfg.label}</span>
       {isLate && (
-        <span style={{
+        <span className="status-late" style={{
           background: '#FEF3EC', color: '#E07B39',
           fontFamily: 'Inter', fontWeight: 700, fontSize: 10,
           borderRadius: 4, padding: '2px 7px', letterSpacing: '0.06em',
@@ -82,9 +90,153 @@ function ordinal(n) {
 
 const printStyles = `
   @media print {
-    aside, header, .no-print { display: none !important; }
-    body { background: white; }
-    * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    /* Hide everything except report content */
+    nav, aside, .sidebar, header, button, .no-print,
+    [class*="sidebar"], [class*="nav"], [class*="header"] {
+      display: none !important;
+    }
+
+    body {
+      background: white !important;
+      font-family: 'Inter', sans-serif;
+      color: #1A1A1A;
+      margin: 0;
+      padding: 0;
+    }
+
+    .report-content {
+      padding: 40px !important;
+      max-width: 100% !important;
+    }
+
+    /* Report header */
+    .report-header {
+      display: flex !important;
+      align-items: center !important;
+      justify-content: space-between !important;
+      border-bottom: 3px solid #4A90D9 !important;
+      padding-bottom: 20px !important;
+      margin-bottom: 32px !important;
+    }
+
+    .report-logo {
+      font-size: 28px !important;
+      font-weight: 900 !important;
+      color: #4A90D9 !important;
+      letter-spacing: -1px !important;
+    }
+
+    .report-meta {
+      text-align: right !important;
+      font-size: 13px !important;
+      color: #666 !important;
+    }
+
+    /* Section titles */
+    .report-section-title {
+      font-size: 11px !important;
+      font-weight: 600 !important;
+      letter-spacing: 1.5px !important;
+      color: #C9A84C !important;
+      text-transform: uppercase !important;
+      margin: 28px 0 12px !important;
+      padding-bottom: 6px !important;
+      border-bottom: 1px solid #E5E5E5 !important;
+    }
+
+    /* Stats grid */
+    .stats-grid {
+      display: grid !important;
+      grid-template-columns: repeat(4, 1fr) !important;
+      gap: 16px !important;
+      margin-bottom: 20px !important;
+    }
+
+    .stat-card {
+      background: #F8F8F8 !important;
+      border: 1px solid #E5E5E5 !important;
+      border-radius: 8px !important;
+      padding: 16px !important;
+      text-align: center !important;
+    }
+
+    .stat-label {
+      font-size: 10px !important;
+      color: #999 !important;
+      text-transform: uppercase !important;
+      letter-spacing: 1px !important;
+      margin-bottom: 6px !important;
+    }
+
+    .stat-value {
+      font-size: 24px !important;
+      font-weight: 700 !important;
+      color: #4A90D9 !important;
+    }
+
+    /* Tables */
+    table {
+      width: 100% !important;
+      border-collapse: collapse !important;
+      font-size: 12px !important;
+      margin-top: 12px !important;
+    }
+
+    thead tr {
+      background: #4A90D9 !important;
+      color: white !important;
+      -webkit-print-color-adjust: exact !important;
+      print-color-adjust: exact !important;
+    }
+
+    thead th {
+      padding: 10px 12px !important;
+      text-align: left !important;
+      font-weight: 600 !important;
+      font-size: 11px !important;
+      letter-spacing: 0.5px !important;
+      color: white !important;
+      background: transparent !important;
+      border: none !important;
+    }
+
+    tbody tr:nth-child(even) {
+      background: #F5F5F5 !important;
+      -webkit-print-color-adjust: exact !important;
+      print-color-adjust: exact !important;
+    }
+
+    tbody td {
+      padding: 9px 12px !important;
+      border-bottom: 1px solid #EEEEEE !important;
+      vertical-align: middle !important;
+    }
+
+    /* Status badges in print */
+    .status-verified { color: #2E7D32 !important; font-weight: 600 !important; background: transparent !important; }
+    .status-not-verified { color: #C62828 !important; font-weight: 600 !important; background: transparent !important; }
+    .status-late { color: #E07B39 !important; font-weight: 600 !important; background: transparent !important; }
+    .status-pending { color: #F57F17 !important; font-weight: 600 !important; background: transparent !important; }
+    .status-partial { color: #1565C0 !important; font-weight: 600 !important; background: transparent !important; }
+
+    /* Footer */
+    .report-footer {
+      margin-top: 40px !important;
+      padding-top: 16px !important;
+      border-top: 1px solid #E5E5E5 !important;
+      font-size: 11px !important;
+      color: #999 !important;
+      display: flex !important;
+      justify-content: space-between !important;
+    }
+
+    /* Page breaks */
+    .page-break { page-break-before: always !important; }
+    table { page-break-inside: auto !important; }
+    tr { page-break-inside: avoid !important; }
+
+    /* Hide period bar and card borders in print */
+    .card { border: none !important; box-shadow: none !important; background: transparent !important; padding: 0 !important; }
   }
 `;
 
@@ -100,7 +252,12 @@ export default function TenantReports() {
   const [loading, setLoading]     = useState(false);
   const [error, setError]         = useState('');
 
-  const handleDownload = () => window.print();
+  const handleDownload = () => {
+    const originalTitle = document.title;
+    document.title = `UPahan-Report-${new Date().toISOString().split('T')[0]}`;
+    window.print();
+    document.title = originalTitle;
+  };
 
   const handleExportCSV = () => {
     if (!report) return;
@@ -146,13 +303,29 @@ export default function TenantReports() {
   }, []);
 
   const fmtDate = (d) => d ? new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '—';
+  const generatedLabel = new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
 
   return (
     <TenantLayout title="My Report">
       <style>{printStyles}</style>
-      <SectionHeader label="Reports" title="My Report" />
+      <div className="no-print">
+        <SectionHeader label="Reports" title="My Report" />
+      </div>
 
-      <div style={{ padding: '0 16px 32px', display: 'flex', flexDirection: 'column', gap: 16 }}>
+      <div className="report-content" style={{ padding: '0 16px 32px', display: 'flex', flexDirection: 'column', gap: 16 }}>
+
+        {/* Print-only branded header */}
+        <div className="report-header" style={{ display: 'none' }}>
+          <div>
+            <div className="report-logo">🏠 UPAHAN</div>
+            <div style={{ fontSize: 12, color: '#666', marginTop: 4 }}>RGT Real Estate Marketing</div>
+          </div>
+          <div className="report-meta">
+            <div style={{ fontWeight: 600, fontSize: 14 }}>Tenant Report</div>
+            <div>Generated: {generatedLabel}</div>
+            <div>Period: {report?.period?.start} — {report?.period?.end}</div>
+          </div>
+        </div>
 
         {/* Period selector */}
         <div className="card no-print" style={{ padding: 16 }}>
@@ -244,7 +417,7 @@ export default function TenantReports() {
         {report && (
           <>
             {/* Period header */}
-            <div style={{ background: BLUE, borderRadius: 10, padding: '12px 16px' }}>
+            <div className="no-print" style={{ background: BLUE, borderRadius: 10, padding: '12px 16px' }}>
               <p style={{ fontFamily: 'Inter', fontWeight: 700, fontSize: 11, color: 'rgba(255,255,255,0.7)', letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: 2 }}>
                 Report Period
               </p>
@@ -255,8 +428,8 @@ export default function TenantReports() {
 
             {/* My Unit */}
             <div className="card" style={{ padding: 16 }}>
-              <p style={{ ...labelStyle, marginBottom: 12 }}>My Unit</p>
-              <div style={{ display: 'flex', gap: 10 }}>
+              <p className="report-section-title" style={{ ...labelStyle, marginBottom: 12 }}>My Unit</p>
+              <div className="stats-grid" style={{ display: 'flex', gap: 10 }}>
                 {statCard('Unit', report.unit.unit_code, true)}
                 {statCard('Monthly Rent', formatPeso(report.unit.monthly_rent), false)}
                 {statCard('Due Day', ordinal(report.unit.due_day), false)}
@@ -265,11 +438,11 @@ export default function TenantReports() {
 
             {/* My Payments */}
             <div className="card" style={{ padding: 16 }}>
-              <p style={{ ...labelStyle, marginBottom: 8 }}>My Payments</p>
+              <p className="report-section-title" style={{ ...labelStyle, marginBottom: 8 }}>My Payments</p>
               <p style={{ fontFamily: 'Inter', fontWeight: 800, fontSize: 28, color: BLUE, marginBottom: 12 }}>
                 {formatPeso(report.payments.total_paid)}
               </p>
-              <div style={{ display: 'flex', gap: 10, marginBottom: 14 }}>
+              <div className="stats-grid" style={{ display: 'flex', gap: 10, marginBottom: 14 }}>
                 {statCard('Transactions', report.payments.total_transactions, false)}
                 {statCard('Late Payments', report.payments.late_payments, false)}
               </div>
@@ -296,8 +469,8 @@ export default function TenantReports() {
 
             {/* My Maintenance */}
             <div className="card" style={{ padding: 16 }}>
-              <p style={{ ...labelStyle, marginBottom: 12 }}>My Maintenance</p>
-              <div style={{ display: 'flex', gap: 10, marginBottom: 14 }}>
+              <p className="report-section-title" style={{ ...labelStyle, marginBottom: 12 }}>My Maintenance</p>
+              <div className="stats-grid" style={{ display: 'flex', gap: 10, marginBottom: 14 }}>
                 {statCard('Total', report.maintenance.total_requests, false)}
                 {statCard('Resolved', report.maintenance.resolved, true)}
                 {statCard('Pending', report.maintenance.pending, false)}
@@ -323,6 +496,13 @@ export default function TenantReports() {
             </div>
           </>
         )}
+
+        {/* Print-only footer */}
+        <div className="report-footer" style={{ display: 'none' }}>
+          <div>UPahan — Rental Property Management System</div>
+          <div>Confidential — For internal use only</div>
+          <div>Page <span className="page-number"></span></div>
+        </div>
       </div>
     </TenantLayout>
   );
