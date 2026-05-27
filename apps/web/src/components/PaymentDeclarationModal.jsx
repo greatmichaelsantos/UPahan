@@ -284,7 +284,13 @@ export default function PaymentDeclarationModal({ unit, monthlyRent, onClose, on
           {/* Payment Method */}
           <div>
             <label style={labelStyle}>Payment Method *</label>
-            <select value={form.paymentMethod} onChange={set('paymentMethod')}
+            <select
+              value={form.paymentMethod}
+              onChange={(e) => setForm(p => ({
+                ...p,
+                paymentMethod: e.target.value,
+                referenceNumber: e.target.value === 'Cash' ? '' : p.referenceNumber,
+              }))}
               style={{ ...baseInput, appearance: 'none', cursor: 'pointer' }}
               onFocus={onFocus} onBlur={onBlur}>
               <option value="">Select payment method...</option>
@@ -308,13 +314,15 @@ export default function PaymentDeclarationModal({ unit, monthlyRent, onClose, on
             </div>
           </div>
 
-          {/* Reference Number */}
-          <div>
-            <label style={labelStyle}>Reference Number</label>
-            <input value={form.referenceNumber} onChange={set('referenceNumber')}
-              placeholder="Transaction / reference number (if applicable)"
-              style={baseInput} onFocus={onFocus} onBlur={onBlur} />
-          </div>
+          {/* Reference Number — hidden for Cash */}
+          {form.paymentMethod !== 'Cash' && (
+            <div>
+              <label style={labelStyle}>Reference Number</label>
+              <input value={form.referenceNumber} onChange={set('referenceNumber')}
+                placeholder="Transaction / reference number (if applicable)"
+                style={baseInput} onFocus={onFocus} onBlur={onBlur} />
+            </div>
+          )}
 
           {/* Proof of Payment */}
           <div>
