@@ -5,7 +5,7 @@ import { STORAGE_KEYS } from '@upahan/shared';
 // iOS Simulator  : http://localhost:5000
 // Android Emulator: http://10.0.2.2:5000
 // Physical device : http://<your-local-ip>:5000
-export const BASE_URL = 'http://192.168.1.38:5000';
+export const BASE_URL = 'https://upahan-nzug.onrender.com';
 
 const api = axios.create({
   baseURL: `${BASE_URL}/api`,
