@@ -22,6 +22,7 @@ if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir, { recursive: true });
 
 const allowedOrigins = [
   'http://localhost:5173',
+  'https://upahan-w.vercel.app',
   process.env.WEB_URL,
 ].filter(Boolean);
 
